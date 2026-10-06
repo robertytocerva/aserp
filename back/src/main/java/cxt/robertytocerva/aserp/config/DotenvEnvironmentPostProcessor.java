@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class DotenvEnvironmentPostProcessor implements EnvironmentPostProcessor {
 
-    private static final String[] CLAVES = {"NEON_DB_URL"};
+    private static final String[] CLAVES = {"NEON_DB_URL", "JWT_SECRET"};
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {

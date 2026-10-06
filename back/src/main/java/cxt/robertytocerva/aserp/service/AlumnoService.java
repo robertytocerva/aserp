@@ -3,11 +3,15 @@ package cxt.robertytocerva.aserp.service;
 import cxt.robertytocerva.aserp.dto.AlumnoDTO;
 import cxt.robertytocerva.aserp.entity.Alumno;
 import cxt.robertytocerva.aserp.entity.Carrera;
+import cxt.robertytocerva.aserp.entity.RolUsuario;
+import cxt.robertytocerva.aserp.entity.Usuario;
 import cxt.robertytocerva.aserp.exception.BadRequestException;
 import cxt.robertytocerva.aserp.exception.ResourceNotFoundException;
 import cxt.robertytocerva.aserp.repository.AlumnoRepository;
 import cxt.robertytocerva.aserp.repository.CarreraRepository;
+import cxt.robertytocerva.aserp.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +23,8 @@ public class AlumnoService {
 
     private final AlumnoRepository alumnoRepository;
     private final CarreraRepository carreraRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
     public List<AlumnoDTO.Response> listarTodos() {
@@ -35,12 +41,15 @@ public class AlumnoService {
     }
 
     @Transactional
-    public AlumnoDTO.Response registrar(AlumnoDTO.Request request) {
+    public AlumnoDTO.Response registrar(AlumnoDTO.RegistroRequest request) {
         if (alumnoRepository.existsByMatricula(request.matricula())) {
             throw new BadRequestException("Ya existe un alumno con la matricula: " + request.matricula());
         }
         if (alumnoRepository.existsByCorreo(request.correo())) {
             throw new BadRequestException("Ya existe un alumno con el correo: " + request.correo());
+        }
+        if (usuarioRepository.existsByCorreo(request.correo())) {
+            throw new BadRequestException("Ya existe una cuenta con el correo: " + request.correo());
         }
 
         Carrera carrera = carreraRepository.findById(request.idCarrera())
@@ -58,6 +67,15 @@ public class AlumnoService {
                 .build();
 
         alumno = alumnoRepository.save(alumno);
+
+        Usuario usuario = Usuario.builder()
+                .correo(request.correo())
+                .passwordHash(passwordEncoder.encode(request.password()))
+                .rol(RolUsuario.ALUMNO)
+                .alumno(alumno)
+                .build();
+        usuarioRepository.save(usuario);
+
         return toResponse(alumno);
     }
 
