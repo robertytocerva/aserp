@@ -1,11 +1,13 @@
 package cxt.robertytocerva.aserp.controller;
 
 import cxt.robertytocerva.aserp.dto.AsesorDTO;
+import cxt.robertytocerva.aserp.exception.BadRequestException;
 import cxt.robertytocerva.aserp.service.AsesorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,8 +30,13 @@ public class AsesorController {
     }
 
     @PostMapping
-    public ResponseEntity<AsesorDTO.Response> registrar(@Valid @RequestBody AsesorDTO.RegistroRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(asesorService.registrar(request));
+    public ResponseEntity<AsesorDTO.Response> registrar(@AuthenticationPrincipal Jwt jwt,
+                                                        @Valid @RequestBody AsesorDTO.RegistroRequest request) {
+        Number claim = jwt.getClaim("idAlumno");
+        if (claim == null) {
+            throw new BadRequestException("La cuenta no tiene un alumno asociado para postularse como asesor");
+        }
+        return ResponseEntity.status(201).body(asesorService.registrar(claim.intValue(), request));
     }
 
     @DeleteMapping("/{id}")

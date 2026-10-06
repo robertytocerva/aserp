@@ -34,6 +34,9 @@ public class Asesor {
     @Column(nullable = false)
     private Boolean activo = true;
 
+    @Column(nullable = false)
+    private Boolean validado;
+
     @Column(name = "creado_en", nullable = false, updatable = false)
     private LocalDateTime creadoEn;
 
@@ -42,6 +45,9 @@ public class Asesor {
         this.creadoEn = LocalDateTime.now();
         if (this.fechaInicio == null) {
             this.fechaInicio = LocalDate.now();
+        }
+        if (this.validado == null) {
+            this.validado = false;
         }
         if (this.activo == null) {
             this.activo = true;

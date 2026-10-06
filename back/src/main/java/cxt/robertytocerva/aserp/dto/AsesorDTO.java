@@ -7,12 +7,14 @@ import java.math.BigDecimal;
 public class AsesorDTO {
 
     public record RegistroRequest(
-            @NotNull(message = "El idAlumno es obligatorio")
-            Integer idAlumno,
-
             @DecimalMin(value = "0.00", message = "El promedio minimo es 0")
             @DecimalMax(value = "10.00", message = "El promedio maximo es 10")
             BigDecimal promedio
+    ) {}
+
+    public record ValidacionRequest(
+            @NotNull(message = "El estado de validacion es obligatorio")
+            Boolean validado
     ) {}
 
     public record Response(
@@ -22,6 +24,7 @@ public class AsesorDTO {
             String matricula,
             BigDecimal promedio,
             String fechaInicio,
+            Boolean validado,
             Boolean activo
     ) {}
 }
