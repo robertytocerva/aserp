@@ -43,5 +43,8 @@ public class Asesor {
         if (this.fechaInicio == null) {
             this.fechaInicio = LocalDate.now();
         }
+        if (this.activo == null) {
+            this.activo = true;
+        }
     }
 }
