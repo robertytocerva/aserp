@@ -44,6 +44,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/asesores").hasAnyRole("ALUMNO", "ASESOR")
                         .requestMatchers("/api/horarios", "/api/horarios/**").hasRole("ASESOR")
+                        .requestMatchers(HttpMethod.GET, "/api/solicitudes/mis").hasAnyRole("ALUMNO", "ASESOR")
+                        .requestMatchers(HttpMethod.POST, "/api/solicitudes").hasAnyRole("ALUMNO", "ASESOR")
+                        .requestMatchers(HttpMethod.GET, "/api/solicitudes/recibidas").hasRole("ASESOR")
+                        .requestMatchers(HttpMethod.PATCH, "/api/solicitudes/*/aceptar",
+                                "/api/solicitudes/*/rechazar").hasRole("ASESOR")
                         .anyRequest().permitAll()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
