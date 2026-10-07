@@ -1,0 +1,110 @@
+:root {
+  /* ============ AZULES ============ */
+  --azul-primario:       #0D47A1;
+  --azul-claro:          #1976D2;
+  --azul-suave:          #E3F2FD;
+  --azul-oscuro:         #072F6B;
+
+  /* ============ AMARILLOS ============ */
+  --amarillo-primario:   #FFC107;
+  --amarillo-oscuro:     #FFA000;
+  --amarillo-suave:      #FFF8E1;
+
+  /* ============ NEUTROS ============ */
+  --blanco:              #FFFFFF;
+  --fondo:               #F8F9FA;
+  --texto:               #212529;
+  --texto-suave:         #6C757D;
+  --borde:               #DEE2E6;
+
+  /* ============ ESTADOS ============ */
+  --exito:               #198754;
+  --peligro:             #DC3545;
+  --advertencia:         #FFC107;
+  --info:                #0DCAF0;
+
+  /* ============ BOOTSTRAP OVERRIDES ============ */
+  --bs-primary:          #0D47A1;
+  --bs-primary-rgb:      13, 71, 161;
+  --bs-warning:          #FFC107;
+  --bs-warning-rgb:      255, 193, 7;
+}
+
+/* ============ RESET Y BASE ============ */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  background-color: var(--fondo);
+  color: var(--texto);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============ UTILIDADES PERSONALIZADAS ============ */
+.bg-azul-primario   { background-color: var(--azul-primario) !important; }
+.bg-azul-claro      { background-color: var(--azul-claro) !important; }
+.bg-azul-suave      { background-color: var(--azul-suave) !important; }
+.bg-amarillo        { background-color: var(--amarillo-primario) !important; }
+.bg-amarillo-suave  { background-color: var(--amarillo-suave) !important; }
+
+.text-azul          { color: var(--azul-primario) !important; }
+.text-azul-claro    { color: var(--azul-claro) !important; }
+.text-amarillo      { color: var(--amarillo-oscuro) !important; }
+.text-suave         { color: var(--texto-suave) !important; }
+
+.btn-azul {
+  background-color: var(--azul-primario);
+  border-color: var(--azul-primario);
+  color: var(--blanco);
+  font-weight: 500;
+}
+.btn-azul:hover,
+.btn-azul:focus {
+  background-color: var(--azul-claro);
+  border-color: var(--azul-claro);
+  color: var(--blanco);
+}
+
+.btn-amarillo {
+  background-color: var(--amarillo-primario);
+  border-color: var(--amarillo-primario);
+  color: var(--texto);
+  font-weight: 600;
+}
+.btn-amarillo:hover,
+.btn-amarillo:focus {
+  background-color: var(--amarillo-oscuro);
+  border-color: var(--amarillo-oscuro);
+  color: var(--texto);
+}
+
+.btn-outline-azul {
+  background-color: transparent;
+  border: 2px solid var(--azul-primario);
+  color: var(--azul-primario);
+  font-weight: 500;
+}
+.btn-outline-azul:hover {
+  background-color: var(--azul-primario);
+  color: var(--blanco);
+}
+
+/* Tarjetas */
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid var(--borde);
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(13, 71, 161, 0.15);
+}
