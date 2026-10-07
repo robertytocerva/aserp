@@ -93,6 +93,13 @@ public class AsesorService {
         return asesor;
     }
 
+    @Transactional(readOnly = true)
+    public Asesor obtenerAsesorValidadoDeAlumno(Integer idAlumno) {
+        Asesor asesor = asesorRepository.findByAlumnoIdAlumno(idAlumno)
+                .orElseThrow(() -> new BadRequestException("La cuenta no tiene un perfil de asesor"));
+        return obtenerAsesorValidado(asesor.getIdAsesor());
+    }
+
     private AsesorDTO.Response toResponse(Asesor a) {
         return new AsesorDTO.Response(
                 a.getIdAsesor(),
