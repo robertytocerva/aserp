@@ -53,5 +53,8 @@ public class Alumno {
     @PrePersist
     protected void onCreate() {
         this.creadoEn = LocalDateTime.now();
+        if (this.activo == null) {
+            this.activo = true;
+        }
     }
 }

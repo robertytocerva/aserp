@@ -28,7 +28,7 @@ public class AlumnoController {
     }
 
     @PostMapping
-    public ResponseEntity<AlumnoDTO.Response> registrar(@Valid @RequestBody AlumnoDTO.Request request) {
+    public ResponseEntity<AlumnoDTO.Response> registrar(@Valid @RequestBody AlumnoDTO.RegistroRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(alumnoService.registrar(request));
     }
 

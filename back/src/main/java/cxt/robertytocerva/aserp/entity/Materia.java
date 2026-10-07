@@ -47,5 +47,8 @@ public class Materia {
     @PrePersist
     protected void onCreate() {
         this.creadoEn = LocalDateTime.now();
+        if (this.activo == null) {
+            this.activo = true;
+        }
     }
 }
