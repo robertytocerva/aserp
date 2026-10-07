@@ -942,6 +942,227 @@ Authorization: Bearer <token-asesor>
 
 ---
 
+## Materias por asesor
+
+El admin decide que materias imparte cada asesor. Cada asignacion lleva un `nivelDominio`: `basico`, `intermedio` o `avanzado` (por defecto `intermedio`). Un asesor solo puede tener una asignacion por materia.
+
+Se puede asignar materias a un asesor **activo aunque aun no este validado**, para dejarlo configurado antes de validarlo; no aparece en la lista publica por materia hasta que el admin lo valide.
+
+> **Excepcion al soft delete:** quitar una materia a un asesor es un **borrado real** de la fila en `asesor_materia` (la tabla no tiene columna `activo`). Despues de quitarla se puede volver a asignar.
+
+### Asignar materia a un asesor (solo admin)
+
+Requiere token de una cuenta con rol `ADMIN`. `nivelDominio` es opcional.
+
+```
+POST /api/admin/asesores/1/materias
+Content-Type: application/json
+Authorization: Bearer <token-admin>
+```
+
+**Body:**
+```json
+{
+  "idMateria": 1,
+  "nivelDominio": "avanzado"
+}
+```
+
+**Response 201:**
+```json
+{
+  "idAsesorMateria": 1,
+  "idAsesor": 1,
+  "nombreAsesor": "Juan Perez",
+  "idMateria": 1,
+  "claveMateria": "IS-101",
+  "nombreMateria": "Programacion Estructurada",
+  "nivelDominio": "avanzado"
+}
+```
+
+**Response 400 (materia ya asignada):**
+```json
+{
+  "timestamp": "2026-09-30T20:00:00",
+  "status": 400,
+  "error": "Bad Request",
+  "message": "El asesor ya tiene asignada la materia con id: 1"
+}
+```
+
+**Response 400 (asesor inactivo):**
+```json
+{
+  "timestamp": "2026-09-30T20:00:00",
+  "status": 400,
+  "error": "Bad Request",
+  "message": "El asesor con id 1 esta inactivo"
+}
+```
+
+**Response 400 (materia inactiva):**
+```json
+{
+  "timestamp": "2026-09-30T20:00:00",
+  "status": 400,
+  "error": "Bad Request",
+  "message": "La materia con id 1 esta inactiva"
+}
+```
+
+**Response 400 (validacion):**
+```json
+{
+  "timestamp": "2026-09-30T20:00:00",
+  "status": 400,
+  "error": "Validation Error",
+  "errors": {
+    "idMateria": "El idMateria es obligatorio",
+    "nivelDominio": "El nivel de dominio debe ser basico, intermedio o avanzado"
+  }
+}
+```
+
+**Response 404 (asesor o materia no existe):**
+```json
+{
+  "timestamp": "2026-09-30T20:00:00",
+  "status": 404,
+  "error": "Not Found",
+  "message": "Materia no encontrada con id: 99"
+}
+```
+
+**Response 403 (token sin rol ADMIN):**
+```json
+{
+  "timestamp": "2026-09-30T20:00:00",
+  "status": 403,
+  "error": "Forbidden",
+  "message": "No tienes permisos para realizar esta accion"
+}
+```
+
+### Cambiar nivel de dominio (solo admin)
+
+```
+PUT /api/admin/asesores/1/materias/1
+Content-Type: application/json
+Authorization: Bearer <token-admin>
+```
+
+**Body:**
+```json
+{
+  "nivelDominio": "intermedio"
+}
+```
+
+**Response 200:** Asignacion actualizada (misma forma que el response de asignar).
+
+**Response 404 (asignacion no existe):**
+```json
+{
+  "timestamp": "2026-09-30T20:00:00",
+  "status": 404,
+  "error": "Not Found",
+  "message": "El asesor con id 1 no tiene asignada la materia con id: 99"
+}
+```
+
+### Quitar materia a un asesor (solo admin, borrado real)
+
+```
+DELETE /api/admin/asesores/1/materias/1
+Authorization: Bearer <token-admin>
+```
+
+**Response 204:** Sin body
+
+**Response 404 (asignacion no existe):** mismo formato que en cambiar nivel.
+
+### Listar materias de un asesor
+
+Lectura publica. Incluye las asignaciones aunque el asesor aun no este validado.
+
+```
+GET /api/asesores/1/materias
+```
+
+**Response 200:** Array de asignaciones (misma forma que el response de asignar).
+
+**Response 404 (asesor no existe):**
+```json
+{
+  "timestamp": "2026-09-30T20:00:00",
+  "status": 404,
+  "error": "Not Found",
+  "message": "Asesor no encontrado con id: 99"
+}
+```
+
+### Listar asesores de una materia (con horarios)
+
+Lectura publica. Solo asesores **activos y validados** que imparten la materia, cada uno con sus horarios activos (misma forma que `GET /api/asesores/{id}/horarios`).
+
+```
+GET /api/materias/1/asesores
+```
+
+**Response 200:**
+```json
+[
+  {
+    "idAsesor": 1,
+    "nombreAsesor": "Juan Perez",
+    "matricula": "20240001",
+    "promedio": 9.50,
+    "nivelDominio": "avanzado",
+    "horarios": [
+      {
+        "idHorario": 1,
+        "idAsesor": 1,
+        "nombreAsesor": "Juan Perez",
+        "diaSemana": 2,
+        "horaInicio": "16:00",
+        "horaFin": "18:00",
+        "modalidad": "presencial",
+        "lugar": "Aula 3",
+        "activo": true
+      }
+    ]
+  }
+]
+```
+
+**Response 404 (materia no existe):**
+```json
+{
+  "timestamp": "2026-09-30T20:00:00",
+  "status": 404,
+  "error": "Not Found",
+  "message": "Materia no encontrada con id: 99"
+}
+```
+
+### Ejemplo: asignar una materia y consultar sus asesores
+
+Pre-requisito: una materia y un asesor activo (ver flujo de registro y validacion de asesor).
+
+```bash
+# El admin le asigna la materia al asesor
+curl -X POST http://localhost:8080/api/admin/asesores/1/materias \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <token-admin>" \
+  -d '{"idMateria":1,"nivelDominio":"avanzado"}'
+
+# Un alumno busca asesores validados de la materia, con sus horarios activos
+curl http://localhost:8080/api/materias/1/asesores
+```
+
+---
+
 ## Solicitudes de sesion de tutoria
 
 Una **solicitud** reserva un slot concreto (horario + fecha) de un asesor. Se crea en estado `solicitada`; el asesor la `acepta` (`programada`) o la `rechaza` (`rechazada`). Al crearse se copian del horario `horaInicio`, `horaFin`, `modalidad` y `lugar`, de modo que editar el horario despues no mueve sesiones ya pedidas.
