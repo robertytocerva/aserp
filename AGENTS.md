@@ -74,3 +74,10 @@ There is no lint/format/typecheck tooling and no CI — compile + tests are the 
 
 - Spring Boot 4 starter names differ from Boot 3: `spring-boot-starter-webmvc` (not `starter-web`) and `spring-boot-starter-*-test` variants in `pom.xml`.
 - Lombok is wired as an explicit `annotationProcessorPaths` in `maven-compiler-plugin` for both compile and test-compile — don't remove those executions.
+
+## Deploy (Docker / Render)
+
+- `Dockerfile` + `.dockerignore` + `render.yaml` live at the **repo root** (build context = root; only `back/` is copied). Render deploys as a Docker web service.
+- The entrypoint runs `java -jar app.jar --server.port=${PORT:-8080}` — Render injects `PORT` and Spring Boot does not map it on its own. Don't hardcode the port.
+- Build runs `mvn -DskipTests` (tests boot `@SpringBootTest` against the live DB). Required env vars in Render: `NEON_DB_URL`, `JWT_SECRET` (`render.yaml` marks them `sync: false`).
+- `back/.env` is `.dockerignore`d — secrets must come from the environment, never baked into the image. `DotenvEnvironmentPostProcessor` ignores the missing file, so the same code runs local and in Render.
