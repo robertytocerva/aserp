@@ -13,21 +13,55 @@ function Asesores() {
   // Filtros
   const [busqueda, setBusqueda] = useState('');
   const [materiaSeleccionada, setMateriaSeleccionada] = useState('');
+  const [materiasDisponibles, setMateriasDisponibles] = useState([]);
 
-  // Cargar datos
+  // ============ CARGA ============
   useEffect(() => {
     const cargar = async () => {
       setCargando(true);
       setError('');
       try {
         if (USE_MOCKS) {
-          // Simular delay de red para ver el spinner
           await new Promise((r) => setTimeout(r, 400));
           setAsesores(asesoresMock);
+          setMateriasDisponibles(materiasMock);
         } else {
-          const data = await asesoresApi.listarTodos();
-          // Enriquecer con materias y datos extra (cuando el backend lo soporte)
-          setAsesores(data.filter((a) => a.activo && a.validado));
+          // 1. Traer asesores validados
+          const lista = await asesoresApi.listarTodos();
+          const validados = lista.filter((a) => a.activo && a.validado);
+
+          // 2. Para cada asesor, traer sus materias
+          const asesoresConMaterias = await Promise.all(
+            validados.map(async (a) => {
+              try {
+                const materias = await asesoresApi.materiasDeAsesor(a.idAsesor);
+                return { ...a, materias };
+              } catch {
+                return { ...a, materias: [] };
+              }
+            })
+          );
+
+          setAsesores(asesoresConMaterias);
+
+          // 3. Extraer materias únicas para el filtro
+          const mapaMaterias = new Map();
+          asesoresConMaterias.forEach((a) => {
+            (a.materias || []).forEach((m) => {
+              if (!mapaMaterias.has(m.idMateria)) {
+                mapaMaterias.set(m.idMateria, {
+                  idMateria: m.idMateria,
+                  nombre: m.nombreMateria || m.nombre,
+                  clave: m.claveMateria,
+                });
+              }
+            });
+          });
+          setMateriasDisponibles(
+            Array.from(mapaMaterias.values()).sort((a, b) =>
+              a.nombre.localeCompare(b.nombre)
+            )
+          );
         }
       } catch (err) {
         setError(err.mensaje || 'No se pudieron cargar los asesores.');
@@ -38,25 +72,9 @@ function Asesores() {
     cargar();
   }, []);
 
-  // Extraer materias únicas (para el filtro)
-  const materiasDisponibles = useMemo(() => {
-    if (USE_MOCKS) return materiasMock;
-
-    const mapa = new Map();
-    asesores.forEach((a) => {
-      (a.materias || []).forEach((m) => {
-        if (!mapa.has(m.idMateria)) {
-          mapa.set(m.idMateria, { idMateria: m.idMateria, nombre: m.nombre });
-        }
-      });
-    });
-    return Array.from(mapa.values()).sort((a, b) => a.nombre.localeCompare(b.nombre));
-  }, [asesores]);
-
-  // Aplicar filtros
+  // ============ FILTRADO ============
   const asesoresFiltrados = useMemo(() => {
     return asesores.filter((a) => {
-      // Filtro por búsqueda de texto (nombre o matrícula)
       if (busqueda) {
         const q = busqueda.toLowerCase();
         const coincide =
@@ -65,7 +83,6 @@ function Asesores() {
         if (!coincide) return false;
       }
 
-      // Filtro por materia
       if (materiaSeleccionada) {
         const tieneMateria = (a.materias || []).some(
           (m) => String(m.idMateria) === String(materiaSeleccionada)
@@ -77,9 +94,9 @@ function Asesores() {
     });
   }, [asesores, busqueda, materiaSeleccionada]);
 
+  // ============ RENDER ============
   return (
     <>
-      {/* ============ HEADER ============ */}
       <section className="py-5" style={{ backgroundColor: 'var(--azul-suave)' }}>
         <Container>
           <h1 className="fw-bold text-azul mb-2">Encuentra tu asesor par</h1>
@@ -90,14 +107,11 @@ function Asesores() {
         </Container>
       </section>
 
-      {/* ============ FILTROS ============ */}
       <Container className="py-4">
         <Row className="g-3 mb-4">
           <Col md={7}>
             <InputGroup>
-              <InputGroup.Text className="bg-white border-end-0">
-                🔍
-              </InputGroup.Text>
+              <InputGroup.Text className="bg-white border-end-0">🔍</InputGroup.Text>
               <Form.Control
                 placeholder="Buscar por nombre o matrícula..."
                 value={busqueda}
@@ -121,7 +135,6 @@ function Asesores() {
           </Col>
         </Row>
 
-        {/* Contador */}
         {!cargando && !error && (
           <div className="d-flex justify-content-between align-items-center mb-3">
             <p className="text-suave small mb-0">
@@ -142,7 +155,6 @@ function Asesores() {
           </div>
         )}
 
-        {/* ============ CONTENIDO ============ */}
         {cargando ? (
           <LoadingSpinner mensaje="Cargando asesores..." />
         ) : error ? (
@@ -167,7 +179,6 @@ function Asesores() {
           </Row>
         )}
 
-        {/* Aviso de mocks */}
         {USE_MOCKS && !cargando && (
           <div className="text-center mt-5">
             <Badge bg="warning" text="dark" className="px-3 py-2">

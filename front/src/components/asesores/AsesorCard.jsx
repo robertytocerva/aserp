@@ -1,23 +1,21 @@
 import { Link } from 'react-router-dom';
 import { Card, Badge } from 'react-bootstrap';
 
-/**
- * Tarjeta individual de un asesor par.
- */
 function AsesorCard({ asesor }) {
   const inicial = asesor.nombreAlumno?.charAt(0).toUpperCase() || '?';
 
-  // Generar color de avatar a partir del nombre para variedad
   const coloresAvatar = [
     '#0D47A1', '#1976D2', '#0097A7', '#388E3C',
     '#7B1FA2', '#C2185B', '#D32F2F', '#F57C00',
   ];
   const colorAvatar = coloresAvatar[(asesor.idAsesor || 0) % coloresAvatar.length];
 
+  // Soporta tanto mocks (m.nombre) como backend real (m.nombreMateria)
+  const obtenerNombreMateria = (m) => m.nombre || m.nombreMateria || 'Materia';
+
   return (
     <Card className="h-100 card-hover border-0 shadow-sm overflow-hidden">
       <Card.Body className="d-flex flex-column">
-        {/* Header: Avatar + nombre */}
         <div className="d-flex align-items-center gap-3 mb-3">
           <div
             className="d-flex align-items-center justify-content-center rounded-circle text-white fw-bold flex-shrink-0"
@@ -40,7 +38,6 @@ function AsesorCard({ asesor }) {
           </div>
         </div>
 
-        {/* Promedio */}
         <div className="d-flex align-items-center gap-2 mb-3">
           <Badge className="btn-amarillo text-dark">
             ⭐ Promedio {asesor.promedio}
@@ -52,7 +49,6 @@ function AsesorCard({ asesor }) {
           )}
         </div>
 
-        {/* Descripción (si existe) */}
         {asesor.descripcion && (
           <p
             className="text-suave small mb-3"
@@ -67,26 +63,30 @@ function AsesorCard({ asesor }) {
           </p>
         )}
 
-        {/* Materias */}
         {asesor.materias && asesor.materias.length > 0 && (
           <div className="mb-3">
             <small className="fw-semibold text-azul d-block mb-1">
               Materias que imparte:
             </small>
             <div className="d-flex flex-wrap gap-1">
-              {asesor.materias.slice(0, 3).map((m) => (
+              {asesor.materias.slice(0, 3).map((m, idx) => (
                 <Badge
-                  key={m.idMateria}
+                  key={m.idMateria || idx}
                   bg="light"
                   text="dark"
                   className="fw-normal border"
                   style={{ fontSize: '0.7rem' }}
                 >
-                  {m.nombre}
+                  {obtenerNombreMateria(m)}
                 </Badge>
               ))}
               {asesor.materias.length > 3 && (
-                <Badge bg="light" text="dark" className="fw-normal border" style={{ fontSize: '0.7rem' }}>
+                <Badge
+                  bg="light"
+                  text="dark"
+                  className="fw-normal border"
+                  style={{ fontSize: '0.7rem' }}
+                >
                   +{asesor.materias.length - 3} más
                 </Badge>
               )}
@@ -94,7 +94,6 @@ function AsesorCard({ asesor }) {
           </div>
         )}
 
-        {/* Botón */}
         <div className="mt-auto">
           <Link
             to={`/asesores/${asesor.idAsesor}`}

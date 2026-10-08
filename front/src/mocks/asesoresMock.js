@@ -6,7 +6,7 @@
  *    Cambia USE_MOCKS a false en Asesores.jsx y PerfilAsesor.jsx
  */
 
-export const USE_MOCKS = true;
+export const USE_MOCKS = false;
 
 export const asesoresMock = [
   {

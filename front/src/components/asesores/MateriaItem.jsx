@@ -1,11 +1,12 @@
 import { Badge } from 'react-bootstrap';
 import { NIVEL_INFO } from '../../mocks/asesoresMock';
 
-/**
- * Fila visual para una materia que imparte el asesor.
- */
 function MateriaItem({ materia }) {
   const nivel = NIVEL_INFO[materia.nivelDominio] || NIVEL_INFO.intermedio;
+
+  // Soporta ambos formatos
+  const nombre = materia.nombre || materia.nombreMateria || 'Materia';
+  const clave = materia.clave || materia.claveMateria || '';
 
   return (
     <div className="d-flex align-items-center justify-content-between p-3 rounded border mb-2 bg-white">
@@ -21,13 +22,11 @@ function MateriaItem({ materia }) {
             fontSize: '0.75rem',
           }}
         >
-          {materia.clave?.split('-')[0] || '📚'}
+          {clave?.split('-')[0] || '📚'}
         </div>
         <div>
-          <div className="fw-semibold text-azul">{materia.nombre}</div>
-          {materia.clave && (
-            <div className="text-suave small">Clave: {materia.clave}</div>
-          )}
+          <div className="fw-semibold text-azul">{nombre}</div>
+          {clave && <div className="text-suave small">Clave: {clave}</div>}
         </div>
       </div>
       <Badge bg={nivel.color} className="fw-normal">
