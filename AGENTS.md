@@ -77,7 +77,7 @@ There is no lint/format/typecheck tooling and no CI — compile + tests are the 
 
 ## Deploy (Docker / Render)
 
-- `Dockerfile` + `.dockerignore` + `render.yaml` live at the **repo root** (build context = root; only `back/` is copied). Render deploys as a Docker web service.
+- `Dockerfile` + `.dockerignore` + `render.yaml` live in `back/` (build context = `back/`; Docker paths are relative to it). Render deploys as a Docker web service with root directory `back/`.
 - The entrypoint runs `java -jar app.jar --server.port=${PORT:-8080}` — Render injects `PORT` and Spring Boot does not map it on its own. Don't hardcode the port.
 - Build runs `mvn -DskipTests` (tests boot `@SpringBootTest` against the live DB). Required env vars in Render: `NEON_DB_URL`, `JWT_SECRET` (`render.yaml` marks them `sync: false`).
-- `back/.env` is `.dockerignore`d — secrets must come from the environment, never baked into the image. `DotenvEnvironmentPostProcessor` ignores the missing file, so the same code runs local and in Render.
+- `back/.env` is `.dockerignore`d (excluded as `.env`, context-relative) — secrets must come from the environment, never baked into the image. `DotenvEnvironmentPostProcessor` ignores the missing file, so the same code runs local and in Render.
