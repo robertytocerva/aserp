@@ -1,0 +1,5 @@
+.git
+**/target
+back/.env
+back/.idea
+front
