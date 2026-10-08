@@ -23,11 +23,16 @@ function Login() {
     setEnviando(true);
 
     try {
-      // ⚠️ Login simulado por ahora (backend sin auth real)
-      login(form);
+      await login(form);
       navigate('/');
     } catch (err) {
-      setError(err.message || 'Error al iniciar sesión.');
+      if (err.tipo === 'auth') {
+        setError(err.mensaje || 'Correo o contraseña incorrectos.');
+      } else if (err.tipo === 'validacion') {
+        setError('Revisa los campos del formulario.');
+      } else {
+        setError(err.mensaje || 'Error al iniciar sesión.');
+      }
     } finally {
       setEnviando(false);
     }
@@ -65,6 +70,7 @@ function Login() {
                     value={form.correo}
                     onChange={onChange}
                     required
+                    autoComplete="email"
                   />
                 </Form.Group>
 
@@ -77,11 +83,8 @@ function Login() {
                     value={form.password}
                     onChange={onChange}
                     required
-                    minLength={4}
+                    autoComplete="current-password"
                   />
-                  <Form.Text className="text-suave">
-                    Mínimo 4 caracteres (temporal, backend sin auth real).
-                  </Form.Text>
                 </Form.Group>
 
                 <Button
@@ -103,11 +106,6 @@ function Login() {
               </p>
             </Card.Body>
           </Card>
-
-          <Alert variant="info" className="mt-4 small">
-            <strong>Demo:</strong> Usa cualquier correo con contraseña de 4+ caracteres.
-            Si el correo empieza con <code>admin@</code> entrarás como administrador.
-          </Alert>
         </Col>
       </Row>
     </Container>

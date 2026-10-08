@@ -4,13 +4,19 @@ import LogoInstitucional from '../ui/LogoInstitucional';
 import { useAuth } from '../../context/AuthContext';
 
 function Navbar() {
-  const { usuario, estaLogueado, logout } = useAuth();
+  const { usuario, estaLogueado, esAdmin, esAsesor, esAlumno, tienePerfilAsesor, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
     navigate('/');
   };
+
+  const etiquetaRol = esAdmin
+    ? 'Administrador'
+    : esAsesor
+    ? 'Asesor Par'
+    : 'Alumno';
 
   return (
     <BSNavbar expand="lg" className="shadow-sm py-2" style={{ backgroundColor: 'var(--azul-primario)' }} variant="dark">
@@ -34,6 +40,37 @@ function Navbar() {
               El Programa
             </Nav.Link>
 
+            {/* Enlaces exclusivos por rol */}
+            {estaLogueado && esAdmin && (
+              <Nav.Link as={NavLink} to="/admin" className="text-white">
+                Panel admin
+              </Nav.Link>
+            )}
+
+            {estaLogueado && esAsesor && (
+              <>
+                <Nav.Link as={NavLink} to="/panel-asesor" className="text-white">
+                  Mi panel
+                </Nav.Link>
+                <Nav.Link as={NavLink} to="/mis-horarios" className="text-white">
+                  Mis horarios
+                </Nav.Link>
+              </>
+            )}
+
+            {estaLogueado && (esAlumno || esAsesor) && (
+              <Nav.Link as={NavLink} to="/mis-solicitudes" className="text-white">
+                Mis solicitudes
+              </Nav.Link>
+            )}
+
+            {/* Enlace de postulación: solo para alumnos sin perfil de asesor */}
+            {estaLogueado && esAlumno && !tienePerfilAsesor && (
+              <Nav.Link as={NavLink} to="/postular-asesor" className="text-white">
+                Quiero ser asesor
+              </Nav.Link>
+            )}
+
             {estaLogueado ? (
               <Dropdown align="end">
                 <Dropdown.Toggle
@@ -55,16 +92,36 @@ function Navbar() {
                   >
                     {usuario?.nombre?.charAt(0).toUpperCase() || 'U'}
                   </span>
-                  <span className="d-none d-md-inline">{usuario?.nombre}</span>
+                  <span className="d-none d-md-inline">
+                    {usuario?.nombreCompleto || usuario?.nombre}
+                  </span>
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
                   <Dropdown.Header className="small">
                     {usuario?.correo}
                   </Dropdown.Header>
-                  <Dropdown.Divider />
                   <Dropdown.Item disabled className="small text-suave">
-                    Rol: {usuario?.rol}
+                    {etiquetaRol}
+                    {usuario?.idAsesor && !usuario?.asesorValidado && (
+                      <span className="ms-2 badge bg-warning text-dark">
+                        Pendiente
+                      </span>
+                    )}
                   </Dropdown.Item>
+                  <Dropdown.Divider />
+
+                  {esAlumno && !tienePerfilAsesor && (
+                    <Dropdown.Item as={Link} to="/postular-asesor">
+                      🎓 Quiero ser asesor
+                    </Dropdown.Item>
+                  )}
+
+                  {tienePerfilAsesor && !usuario?.asesorValidado && (
+                    <Dropdown.Item disabled className="text-warning">
+                      ⏳ Postulación en revisión
+                    </Dropdown.Item>
+                  )}
+
                   <Dropdown.Divider />
                   <Dropdown.Item onClick={handleLogout} className="text-danger">
                     Cerrar sesión

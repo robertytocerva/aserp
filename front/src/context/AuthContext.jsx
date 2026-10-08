@@ -1,106 +1,151 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { authApi } from '../api/authApi';
+import { asesoresApi } from '../api/asesoresApi';
+import axiosClient, { setToken, removeToken, getToken } from '../api/axiosClient';
 
 const AuthContext = createContext(null);
 
-const STORAGE_KEY = 'aserp_sesion';
+const USUARIO_KEY = 'aserp_usuario';
 
 /**
- * Contexto de autenticación.
- *
- * ⚠️ IMPORTANTE: El backend actual no tiene autenticación real (no hay login
- * ni JWT). Por ahora simulamos la sesión guardando los datos del usuario en
- * localStorage. Cuando el backend implemente autenticación, se reemplaza la
- * función `login` por una llamada real a POST /api/auth/login.
+ * Contexto de autenticación REAL con JWT.
  */
 export function AuthProvider({ children }) {
   const [usuario, setUsuario] = useState(null);
   const [cargando, setCargando] = useState(true);
 
-  // Al montar, restaurar sesión desde localStorage
+  // Restaurar sesión al montar
   useEffect(() => {
     try {
-      const guardada = localStorage.getItem(STORAGE_KEY);
-      if (guardada) {
-        setUsuario(JSON.parse(guardada));
+      const token = getToken();
+      const usuarioGuardado = localStorage.getItem(USUARIO_KEY);
+      if (token && usuarioGuardado) {
+        setUsuario(JSON.parse(usuarioGuardado));
+      } else {
+        removeToken();
+        localStorage.removeItem(USUARIO_KEY);
       }
     } catch {
-      localStorage.removeItem(STORAGE_KEY);
+      removeToken();
+      localStorage.removeItem(USUARIO_KEY);
     } finally {
       setCargando(false);
     }
   }, []);
 
   /**
-   * Login simulado.
-   *
-   * TODO: Cuando el backend tenga autenticación real, reemplazar por:
-   *   const { data } = await axiosClient.post('/api/auth/login', { correo, password });
-   *   setUsuario(data.usuario);
-   *   localStorage.setItem(STORAGE_KEY, JSON.stringify(data.usuario));
-   *
-   * Por ahora, simulamos que cualquier correo con contraseña >= 4 caracteres
-   * es válido, y el rol se determina por el dominio del correo:
-   *   - admin@        → administrador
-   *   - @uruapan...   → alumno
+   * Busca el perfil de asesor del alumno logueado.
+   * Devuelve el asesor si existe, o null.
    */
-  const login = ({ correo, password }) => {
-    if (!correo || !password || password.length < 4) {
-      throw new Error('Credenciales inválidas.');
+  const buscarPerfilAsesor = useCallback(async (idAlumno) => {
+    if (!idAlumno) return null;
+    try {
+      const lista = await asesoresApi.listarTodos();
+      return lista.find((a) => a.idAlumno === idAlumno) || null;
+    } catch {
+      return null;
     }
-
-    let rol = 'alumno';
-    if (correo.toLowerCase().startsWith('admin@')) {
-      rol = 'administrador';
-    } else if (correo.toLowerCase().includes('asesor')) {
-      rol = 'asesor';
-    }
-
-    // Simulamos un usuario "autenticado"
-    const usuarioSimulado = {
-      idAlumno: 1,
-      nombre: correo.split('@')[0],
-      correo,
-      rol,
-      // Nota: idAsesor solo existiría si el alumno ya se registró como asesor
-      idAsesor: rol === 'asesor' ? 1 : null,
-    };
-
-    setUsuario(usuarioSimulado);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(usuarioSimulado));
-    return usuarioSimulado;
-  };
-
-  const logout = () => {
-    setUsuario(null);
-    localStorage.removeItem(STORAGE_KEY);
-  };
+  }, []);
 
   /**
-   * Después de un registro exitoso, iniciar sesión automáticamente.
+   * Login real contra el backend.
    */
-  const loginDesdeRegistro = (alumno) => {
-    const usuarioNuevo = {
-      idAlumno: alumno.idAlumno,
-      nombre: alumno.nombre,
-      correo: alumno.correo,
-      rol: 'alumno',
+  const login = useCallback(async ({ correo, password }) => {
+    const data = await authApi.login({ correo, password });
+    setToken(data.token);
+
+    let usuarioCompleto = {
+      idUsuario: data.idUsuario,
+      idAlumno: data.idAlumno,
       idAsesor: null,
+      rol: data.rol,
+      correo,
+      nombre: correo.split('@')[0],
+      nombreCompleto: correo.split('@')[0],
     };
-    setUsuario(usuarioNuevo);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(usuarioNuevo));
-    return usuarioNuevo;
-  };
+
+    // Si es alumno o asesor, traer datos completos
+    if (data.idAlumno) {
+      try {
+        const { data: alumno } = await axiosClient.get(`/api/alumnos/${data.idAlumno}`);
+        usuarioCompleto = {
+          ...usuarioCompleto,
+          nombre: alumno.nombre,
+          apellidoPaterno: alumno.apellidoPaterno,
+          apellidoMaterno: alumno.apellidoMaterno,
+          nombreCompleto: `${alumno.nombre} ${alumno.apellidoPaterno}`.trim(),
+          idCarrera: alumno.idCarrera,
+          nombreCarrera: alumno.nombreCarrera,
+          semestre: alumno.semestre,
+          matricula: alumno.matricula,
+        };
+
+        // Buscar si ya tiene perfil de asesor
+        const asesor = await buscarPerfilAsesor(data.idAlumno);
+        if (asesor) {
+          usuarioCompleto.idAsesor = asesor.idAsesor;
+          usuarioCompleto.asesorValidado = asesor.validado;
+          usuarioCompleto.asesorActivo = asesor.activo;
+        }
+      } catch {
+        // Si falla, seguimos con los datos básicos
+      }
+    } else if (data.rol === 'ADMIN') {
+      usuarioCompleto.nombreCompleto = 'Administrador';
+    }
+
+    setUsuario(usuarioCompleto);
+    localStorage.setItem(USUARIO_KEY, JSON.stringify(usuarioCompleto));
+    return usuarioCompleto;
+  }, [buscarPerfilAsesor]);
+
+  const logout = useCallback(() => {
+    removeToken();
+    localStorage.removeItem(USUARIO_KEY);
+    setUsuario(null);
+  }, []);
+
+  /**
+   * Refresca la info del usuario desde el backend.
+   * Útil después de postularse como asesor.
+   */
+  const refrescarUsuario = useCallback(async () => {
+    if (!usuario?.idAlumno) return usuario;
+
+    try {
+      const { data: alumno } = await axiosClient.get(`/api/alumnos/${usuario.idAlumno}`);
+      const asesor = await buscarPerfilAsesor(usuario.idAlumno);
+
+      const actualizado = {
+        ...usuario,
+        nombre: alumno.nombre,
+        nombreCompleto: `${alumno.nombre} ${alumno.apellidoPaterno}`.trim(),
+        nombreCarrera: alumno.nombreCarrera,
+        semestre: alumno.semestre,
+        idAsesor: asesor?.idAsesor || null,
+        asesorValidado: asesor?.validado ?? null,
+        asesorActivo: asesor?.activo ?? null,
+      };
+
+      setUsuario(actualizado);
+      localStorage.setItem(USUARIO_KEY, JSON.stringify(actualizado));
+      return actualizado;
+    } catch {
+      return usuario;
+    }
+  }, [usuario, buscarPerfilAsesor]);
 
   const value = {
     usuario,
     cargando,
     estaLogueado: !!usuario,
-    esAlumno: usuario?.rol === 'alumno',
-    esAsesor: usuario?.rol === 'asesor',
-    esAdmin: usuario?.rol === 'administrador',
+    esAlumno: usuario?.rol === 'ALUMNO',
+    esAsesor: usuario?.rol === 'ASESOR',
+    esAdmin: usuario?.rol === 'ADMIN',
+    tienePerfilAsesor: !!usuario?.idAsesor,
     login,
     logout,
-    loginDesdeRegistro,
+    refrescarUsuario,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

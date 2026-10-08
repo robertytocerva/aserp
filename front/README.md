@@ -1,16 +1,24 @@
-# React + Vite
+# Portal de Asesorías Par — ITS Uruapan
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Plataforma web para automatizar el registro, coordinación y seguimiento del
+Programa de Asesores Pares del Instituto Tecnológico Superior Campus Uruapan.
 
-Currently, two official plugins are available:
+## 🚀 Tecnologías
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **React 19** + **Vite**
+- **React Router** para navegación
+- **Bootstrap 5** + **React-Bootstrap** para UI
+- **Axios** para consumo de API
+- **Backend:** Spring Boot + PostgreSQL (Neon)
 
-## React Compiler
+## 📋 Requisitos previos
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Node.js 20+
+- npm 10+
+- Backend corriendo en `http://localhost:8080`
 
-## Expanding the Oxlint configuration
+## 🔧 Instalación
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+```bash
+cd front
+npm install

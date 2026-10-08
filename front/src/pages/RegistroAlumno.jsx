@@ -15,11 +15,13 @@ const FORM_INICIAL = {
   telefono: '',
   idCarrera: '',
   semestre: '',
+  password: '',
+  confirmarPassword: '',
 };
 
 function RegistroAlumno() {
   const navigate = useNavigate();
-  const { loginDesdeRegistro } = useAuth();
+  const { login } = useAuth();
 
   const [form, setForm] = useState(FORM_INICIAL);
   const [carreras, setCarreras] = useState([]);
@@ -28,22 +30,29 @@ function RegistroAlumno() {
   const [errorGeneral, setErrorGeneral] = useState('');
   const [enviando, setEnviando] = useState(false);
 
-  // Cargar carreras al montar
   useEffect(() => {
-    const cargar = async () => {
-      try {
-        const data = await carrerasApi.listarTodas();
-        setCarreras(data.filter((c) => c.activo));
-      } catch (err) {
+  const cargar = async () => {
+    try {
+      const data = await carrerasApi.listarTodas();
+      const activas = data.filter((c) => c.activo);
+      setCarreras(activas);
+
+      // Si el backend responde pero no hay carreras, avisar
+      if (activas.length === 0) {
         setErrorGeneral(
-          err.mensaje || 'No se pudieron cargar las carreras. Verifica que el backend esté corriendo.'
+          'Aún no hay carreras registradas en el sistema. Contacta al administrador.'
         );
-      } finally {
-        setCargandoCarreras(false);
       }
-    };
-    cargar();
-  }, []);
+    } catch (err) {
+      setErrorGeneral(
+        err.mensaje || 'No se pudieron cargar las carreras. Verifica que el backend esté corriendo.'
+      );
+    } finally {
+      setCargandoCarreras(false);
+    }
+  };
+  cargar();
+}, []);
 
   const onChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -68,6 +77,14 @@ function RegistroAlumno() {
     } else if (form.semestre < 1 || form.semestre > 20) {
       nuevos.semestre = 'El semestre debe estar entre 1 y 20';
     }
+    if (!form.password) {
+      nuevos.password = 'La contraseña es obligatoria';
+    } else if (form.password.length < 6) {
+      nuevos.password = 'La contraseña debe tener al menos 6 caracteres';
+    }
+    if (form.password !== form.confirmarPassword) {
+      nuevos.confirmarPassword = 'Las contraseñas no coinciden';
+    }
     setErrores(nuevos);
     return Object.keys(nuevos).length === 0;
   };
@@ -88,10 +105,12 @@ function RegistroAlumno() {
         telefono: form.telefono.trim() || null,
         idCarrera: Number(form.idCarrera),
         semestre: Number(form.semestre),
+        password: form.password,
       };
 
-      const alumnoCreado = await alumnosApi.registrar(payload);
-      loginDesdeRegistro(alumnoCreado);
+      await alumnosApi.registrar(payload);
+      // Auto-login tras registro
+      await login({ correo: payload.correo, password: payload.password });
       navigate('/');
     } catch (err) {
       if (err.tipo === 'validacion') {
@@ -236,7 +255,7 @@ function RegistroAlumno() {
                     </Col>
                   </Row>
 
-                  <Form.Group className="mb-4">
+                  <Form.Group className="mb-3">
                     <Form.Label className="fw-semibold small">Carrera *</Form.Label>
                     <Form.Select
                       name="idCarrera"
@@ -256,10 +275,47 @@ function RegistroAlumno() {
                     </Form.Control.Feedback>
                   </Form.Group>
 
+                  <hr className="my-3" />
+                  <p className="fw-semibold small text-azul mb-2">Datos de acceso</p>
+
+                  <Row>
+                    <Col md={6}>
+                      <Form.Group className="mb-3">
+                        <Form.Label className="fw-semibold small">Contraseña *</Form.Label>
+                        <Form.Control
+                          type="password"
+                          name="password"
+                          value={form.password}
+                          onChange={onChange}
+                          isInvalid={!!errores.password}
+                          placeholder="Mínimo 6 caracteres"
+                        />
+                        <Form.Control.Feedback type="invalid">
+                          {errores.password}
+                        </Form.Control.Feedback>
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Group className="mb-3">
+                        <Form.Label className="fw-semibold small">Confirmar contraseña *</Form.Label>
+                        <Form.Control
+                          type="password"
+                          name="confirmarPassword"
+                          value={form.confirmarPassword}
+                          onChange={onChange}
+                          isInvalid={!!errores.confirmarPassword}
+                        />
+                        <Form.Control.Feedback type="invalid">
+                          {errores.confirmarPassword}
+                        </Form.Control.Feedback>
+                      </Form.Group>
+                    </Col>
+                  </Row>
+
                   <Button
                     type="submit"
                     className="btn-azul w-100 py-2 fw-semibold"
-                    disabled={enviando}
+                    disabled={enviando || carreras.length === 0}
                   >
                     {enviando ? 'Registrando...' : 'Crear cuenta'}
                   </Button>
