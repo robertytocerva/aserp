@@ -150,7 +150,7 @@ function PerfilAsesor() {
   const handleSolicitudExitosa = () => {
     setModal({ show: false, slot: null });
     setExito(
-      '✅ Tu solicitud fue enviada. El asesor la revisará y te notificará pronto.'
+      'Tu solicitud fue enviada. El asesor la revisará y te notificará pronto.'
     );
     cargarSlots();
     setTimeout(() => setExito(''), 8000);
@@ -214,19 +214,40 @@ function PerfilAsesor() {
             <Col className="text-white">
               <h1 className="fw-bold mb-1">{asesor.nombreAlumno}</h1>
               <p className="mb-2" style={{ opacity: 0.9 }}>
-                <span className="me-3">🎓 Matrícula: {asesor.matricula}</span>
-                <span>📚 {asesor.semestre}° Semestre</span>
+                <span className="me-3">
+                  <i className="bi bi-mortarboard-fill me-1"></i> Matrícula: {asesor.matricula}
+                </span>
+                <span>
+                  <i className="bi bi-book-fill me-1"></i> {asesor.semestre}° Semestre
+                </span>
               </p>
               <p className="mb-2 small" style={{ opacity: 0.85 }}>
                 {asesor.carrera}
               </p>
               <div className="d-flex flex-wrap gap-2">
-                <Badge className="btn-amarillo text-dark fw-normal">
-                  ⭐ Promedio {asesor.promedio}
+                <Badge
+                  className="fw-normal"
+                  style={{
+                    backgroundColor: 'var(--azul-claro)',
+                    color: 'var(--blanco)',
+                    fontSize: '0.85rem',
+                    padding: '0.5em 0.9em',
+                    border: '1px solid var(--azul-suave)',
+                  }}
+                >
+                  <i
+                    className="bi bi-star-fill me-1"
+                    style={{ color: 'var(--amarillo-primario)' }}
+                  ></i>
+                  Promedio {asesor.promedio}
                 </Badge>
                 {asesor.validado && (
-                  <Badge bg="success" className="fw-normal">
-                    ✓ Asesor validado
+                  <Badge
+                    bg="success"
+                    className="fw-normal"
+                    style={{ padding: '0.5em 0.9em' }}
+                  >
+                    <i className="bi bi-patch-check-fill me-1"></i> Asesor validado
                   </Badge>
                 )}
               </div>
@@ -308,7 +329,7 @@ function PerfilAsesor() {
                     onClick={cargarSlots}
                     disabled={cargandoSlots}
                   >
-                    🔄
+                    <i className="bi bi-arrow-clockwise"></i>
                   </Button>
                 </div>
 
@@ -331,7 +352,7 @@ function PerfilAsesor() {
                   <LoadingSpinner mensaje="Buscando disponibilidad..." tamaño="sm" />
                 ) : slots.length === 0 ? (
                   <Alert variant="secondary" className="text-center small mb-0">
-                    <div style={{ fontSize: '2rem' }}>📭</div>
+                    <i className="bi bi-inbox me-2" style={{ fontSize: '2rem' }}></i>
                     No hay horarios disponibles en las próximas 2 semanas.
                   </Alert>
                 ) : (
@@ -377,7 +398,7 @@ function PerfilAsesor() {
         {USE_MOCKS && (
           <div className="text-center mt-5">
             <Badge bg="warning" text="dark" className="px-3 py-2">
-              ⚠️ Mostrando datos de prueba — pendiente conectar al backend real
+              <i className="bi bi-exclamation-triangle-fill me-1"></i> Mostrando datos de prueba — pendiente conectar al backend real
             </Badge>
           </div>
         )}

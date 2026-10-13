@@ -13,7 +13,7 @@ function NoEncontrada() {
           fontSize: '5rem',
         }}
       >
-        🔍
+        <i className="bi bi-search"></i>
       </div>
       <h1 className="display-3 fw-bold text-azul mb-2">404</h1>
       <h3 className="fw-bold text-azul mb-3">Página no encontrada</h3>
@@ -23,10 +23,10 @@ function NoEncontrada() {
       </p>
       <div className="d-flex justify-content-center gap-2 flex-wrap">
         <Button as={Link} to="/" className="btn-azul" size="lg">
-          🏠 Volver al inicio
+          <i className="bi bi-house me-1"></i> Volver al inicio
         </Button>
         <Button as={Link} to="/asesores" variant="outline-primary" size="lg">
-          Ver asesores
+          <i className="bi bi-people me-1"></i> Ver asesores
         </Button>
       </div>
     </Container>

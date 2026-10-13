@@ -6,32 +6,32 @@ const MESES_CORTOS = [
   'jul', 'ago', 'sep', 'oct', 'nov', 'dic',
 ];
 
-/**
- * Tarjeta visual de un slot disponible.
- * El slot viene con: idHorario, fecha, horaInicio, horaFin, modalidad, lugar.
- */
 function SlotDisponible({ slot, onSeleccionar, deshabilitado }) {
-  // Parsear la fecha en formato YYYY-MM-DD sin problemas de zona horaria
   const [year, month, day] = slot.fecha.split('-').map(Number);
   const fecha = new Date(year, month - 1, day);
   const diaCorto = DIAS_CORTOS[fecha.getDay()];
   const diaNum = fecha.getDate();
   const mes = MESES_CORTOS[fecha.getMonth()];
 
+  // Icono de modalidad
   const iconoModalidad =
     slot.modalidad === 'virtual'
-      ? '💻'
+      ? 'bi-laptop'
       : slot.modalidad === 'hibrida'
-      ? '🔄'
-      : '🏫';
+      ? 'bi-arrow-repeat'
+      : 'bi-building';
+
+  const labelModalidad =
+    slot.modalidad === 'virtual'
+      ? 'Virtual'
+      : slot.modalidad === 'hibrida'
+      ? 'Híbrida'
+      : 'Presencial';
 
   return (
     <div
       className="p-3 rounded border h-100 d-flex flex-column"
-      style={{
-        backgroundColor: 'var(--blanco)',
-        transition: 'all 0.2s',
-      }}
+      style={{ backgroundColor: 'var(--blanco)', transition: 'all 0.2s' }}
     >
       <div className="d-flex align-items-center gap-3 mb-2">
         <div
@@ -59,15 +59,15 @@ function SlotDisponible({ slot, onSeleccionar, deshabilitado }) {
             {slot.horaInicio} - {slot.horaFin}
           </div>
           <div className="small text-suave">
-            {iconoModalidad}{' '}
-            {slot.modalidad.charAt(0).toUpperCase() + slot.modalidad.slice(1)}
+            <i className={`bi ${iconoModalidad} me-1`}></i>
+            {labelModalidad}
           </div>
         </div>
       </div>
 
       {slot.lugar && (
         <div className="small text-suave mb-2 d-flex align-items-start gap-1">
-          <span>📍</span>
+          <i className="bi bi-geo-alt-fill"></i>
           <span>{slot.lugar}</span>
         </div>
       )}

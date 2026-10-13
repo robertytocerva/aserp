@@ -159,9 +159,9 @@ export const DIAS_SEMANA = {
 };
 
 export const MODALIDAD_INFO = {
-  presencial: { label: 'Presencial', color: 'primary', icon: '🏫' },
-  virtual: { label: 'Virtual', color: 'info', icon: '💻' },
-  hibrida: { label: 'Híbrida', color: 'warning', icon: '🔄' },
+  presencial: { label: 'Presencial', color: 'primary', icon: 'bi-building' },
+  virtual: { label: 'Virtual', color: 'info', icon: 'bi-laptop' },
+  hibrida: { label: 'Híbrida', color: 'warning', icon: 'bi-arrow-repeat' },
 };
 
 export const NIVEL_INFO = {

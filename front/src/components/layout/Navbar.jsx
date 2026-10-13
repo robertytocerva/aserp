@@ -40,7 +40,6 @@ function Navbar() {
               El Programa
             </Nav.Link>
 
-            {/* Enlaces exclusivos por rol */}
             {estaLogueado && esAdmin && (
               <Nav.Link as={NavLink} to="/admin" className="text-white">
                 Panel admin
@@ -64,7 +63,6 @@ function Navbar() {
               </Nav.Link>
             )}
 
-            {/* Enlace de postulación: solo para alumnos sin perfil de asesor */}
             {estaLogueado && esAlumno && !tienePerfilAsesor && (
               <Nav.Link as={NavLink} to="/postular-asesor" className="text-white">
                 Quiero ser asesor
@@ -101,30 +99,29 @@ function Navbar() {
                     {usuario?.correo}
                   </Dropdown.Header>
                   <Dropdown.Item disabled className="small text-suave">
+                    <i className="bi bi-person-badge me-2"></i>
                     {etiquetaRol}
                     {usuario?.idAsesor && !usuario?.asesorValidado && (
-                      <span className="ms-2 badge bg-warning text-dark">
-                        Pendiente
-                      </span>
+                      <span className="ms-2 badge bg-warning text-dark">Pendiente</span>
                     )}
                   </Dropdown.Item>
                   <Dropdown.Divider />
 
                   {esAlumno && !tienePerfilAsesor && (
                     <Dropdown.Item as={Link} to="/postular-asesor">
-                      🎓 Quiero ser asesor
+                      <i className="bi bi-mortarboard me-2"></i> Quiero ser asesor
                     </Dropdown.Item>
                   )}
 
                   {tienePerfilAsesor && !usuario?.asesorValidado && (
                     <Dropdown.Item disabled className="text-warning">
-                      ⏳ Postulación en revisión
+                      <i className="bi bi-hourglass-split me-2"></i> Postulación en revisión
                     </Dropdown.Item>
                   )}
 
                   <Dropdown.Divider />
                   <Dropdown.Item onClick={handleLogout} className="text-danger">
-                    Cerrar sesión
+                    <i className="bi bi-box-arrow-right me-2"></i> Cerrar sesión
                   </Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>

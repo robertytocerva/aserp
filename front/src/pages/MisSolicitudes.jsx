@@ -130,25 +130,25 @@ function MisSolicitudes() {
               variant={filtro === 'solicitada' ? 'warning' : 'outline-warning'}
               onClick={() => setFiltro('solicitada')}
             >
-              ⏳ Pendientes ({contadores.solicitadas})
+              <i className="bi bi-clock me-1"></i> Pendientes ({contadores.solicitadas})
             </Button>
             <Button
               variant={filtro === 'programada' ? 'success' : 'outline-success'}
               onClick={() => setFiltro('programada')}
             >
-              ✅ Programadas ({contadores.programadas})
+              <i className="bi bi-check-circle-fill me-1"></i> Programadas ({contadores.programadas})
             </Button>
             <Button
               variant={filtro === 'historial' ? 'secondary' : 'outline-secondary'}
               onClick={() => setFiltro('historial')}
             >
-              📜 Historial ({contadores.historial})
+              <i className="bi bi-clock-history me-1"></i> Historial ({contadores.historial})
             </Button>
           </ButtonGroup>
 
           <InputGroup size="sm" style={{ maxWidth: '300px' }}>
             <InputGroup.Text className="bg-white border-end-0">
-              🔍
+              <i className="bi bi-search"></i>
             </InputGroup.Text>
             <Form.Control
               placeholder="Buscar por asesor o materia..."
@@ -167,7 +167,7 @@ function MisSolicitudes() {
             onClick={cargar}
             disabled={cargando}
           >
-            🔄 Recargar
+            <i className="bi bi-arrow-clockwise me-1"></i> Recargar
           </Button>
         </div>
 
@@ -176,7 +176,9 @@ function MisSolicitudes() {
           <LoadingSpinner mensaje="Cargando tus solicitudes..." />
         ) : solicitudesFiltradas.length === 0 ? (
           <Alert variant="info" className="text-center py-5">
-            <div style={{ fontSize: '3rem' }}>📭</div>
+            <div style={{ fontSize: '3rem', color: 'var(--azul-primario)' }}>
+              <i className="bi bi-inbox"></i>
+            </div>
             <h5 className="fw-bold text-azul mb-2">
               {solicitudes.length === 0
                 ? 'Aún no has solicitado asesorías'

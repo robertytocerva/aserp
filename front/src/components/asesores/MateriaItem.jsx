@@ -3,8 +3,6 @@ import { NIVEL_INFO } from '../../mocks/asesoresMock';
 
 function MateriaItem({ materia }) {
   const nivel = NIVEL_INFO[materia.nivelDominio] || NIVEL_INFO.intermedio;
-
-  // Soporta ambos formatos
   const nombre = materia.nombre || materia.nombreMateria || 'Materia';
   const clave = materia.clave || materia.claveMateria || '';
 
@@ -22,7 +20,11 @@ function MateriaItem({ materia }) {
             fontSize: '0.75rem',
           }}
         >
-          {clave?.split('-')[0] || '📚'}
+          {clave?.split('-')[0] ? (
+            <span style={{ fontWeight: 'bold' }}>{clave.split('-')[0]}</span>
+          ) : (
+            <i className="bi bi-book-fill"></i>
+          )}
         </div>
         <div>
           <div className="fw-semibold text-azul">{nombre}</div>

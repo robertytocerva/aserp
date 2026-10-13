@@ -48,7 +48,10 @@ function Dashboard() {
                   <div className="text-suave small fw-semibold">
                     HORARIOS ACTIVOS
                   </div>
-                  <span style={{ fontSize: '1.5rem' }}>📅</span>
+                  <i
+                    className="bi bi-calendar-event-fill"
+                    style={{ fontSize: '1.5rem', color: 'var(--azul-primario)' }}
+                  ></i>
                 </div>
                 <div className="display-5 fw-bold text-azul">{activos}</div>
                 <div className="text-suave small">Bloques publicados</div>
@@ -63,7 +66,10 @@ function Dashboard() {
                   <div className="text-suave small fw-semibold">
                     SOLICITUDES PENDIENTES
                   </div>
-                  <span style={{ fontSize: '1.5rem' }}>📩</span>
+                  <i
+                    className="bi bi-envelope-paper-fill"
+                    style={{ fontSize: '1.5rem', color: 'var(--amarillo-oscuro)' }}
+                  ></i>
                 </div>
                 <div className="display-5 fw-bold text-warning">—</div>
                 <div className="text-suave small">Disponible próximamente</div>
@@ -78,7 +84,10 @@ function Dashboard() {
                   <div className="text-suave small fw-semibold">
                     ASESORÍAS PROGRAMADAS
                   </div>
-                  <span style={{ fontSize: '1.5rem' }}>🗓️</span>
+                  <i
+                    className="bi bi-calendar-week-fill"
+                    style={{ fontSize: '1.5rem', color: 'var(--exito)' }}
+                  ></i>
                 </div>
                 <div className="display-5 fw-bold text-success">—</div>
                 <div className="text-suave small">Disponible próximamente</div>
@@ -98,13 +107,15 @@ function Dashboard() {
                   to="/mis-horarios"
                   className="btn btn-azul text-start d-flex align-items-center gap-2"
                 >
-                  📅 Gestionar mis horarios
+                  <i className="bi bi-calendar-event"></i>
+                  Gestionar mis horarios
                 </Link>
                 <Link
                   to="/solicitudes-recibidas"
                   className="btn btn-outline-primary text-start d-flex align-items-center gap-2"
                 >
-                  📩 Ver solicitudes recibidas
+                  <i className="bi bi-envelope-paper"></i>
+                  Ver solicitudes recibidas
                 </Link>
               </div>
             </Card.Body>

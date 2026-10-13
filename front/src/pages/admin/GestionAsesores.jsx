@@ -20,17 +20,11 @@ function GestionAsesores() {
   const [error, setError] = useState('');
   const [exito, setExito] = useState('');
 
-  // Filtros
-  const [filtro, setFiltro] = useState('todos'); // todos | pendientes | validados | inactivos
+  const [filtro, setFiltro] = useState('todos');
   const [busqueda, setBusqueda] = useState('');
-
-  // Estado de acciones en curso (por idAsesor)
   const [accionesEnCurso, setAccionesEnCurso] = useState({});
-
-  // Modal de confirmación para dar de baja
   const [modalBaja, setModalBaja] = useState({ show: false, asesor: null });
 
-  // ============ CARGA DE DATOS ============
   const cargarAsesores = async () => {
     setCargando(true);
     setError('');
@@ -48,7 +42,6 @@ function GestionAsesores() {
     cargarAsesores();
   }, []);
 
-  // ============ ACCIONES ============
   const handleValidar = async (asesor, validar) => {
     setAccionesEnCurso((prev) => ({ ...prev, [asesor.idAsesor]: true }));
     setError('');
@@ -60,8 +53,8 @@ function GestionAsesores() {
       );
       setExito(
         validar
-          ? `✅ ${asesor.nombreAlumno} ha sido validado como asesor.`
-          : `↩️ Se revocó la validación de ${asesor.nombreAlumno}.`
+          ? `${asesor.nombreAlumno} ha sido validado como asesor.`
+          : `Se revocó la validación de ${asesor.nombreAlumno}.`
       );
     } catch (err) {
       setError(err.mensaje || 'No se pudo actualizar la validación.');
@@ -79,13 +72,12 @@ function GestionAsesores() {
     setExito('');
     try {
       await asesoresApi.darDeBaja(asesor.idAsesor);
-
       setAsesores((prev) =>
         prev.map((a) =>
           a.idAsesor === asesor.idAsesor ? { ...a, activo: false } : a
         )
       );
-      setExito(`🚫 ${asesor.nombreAlumno} ha sido dado de baja.`);
+      setExito(`${asesor.nombreAlumno} ha sido dado de baja.`);
     } catch (err) {
       setError(err.mensaje || 'No se pudo dar de baja al asesor.');
     } finally {
@@ -94,15 +86,12 @@ function GestionAsesores() {
     }
   };
 
-  // ============ FILTRADO ============
   const asesoresFiltrados = useMemo(() => {
     return asesores.filter((a) => {
-      // Filtro por estado
       if (filtro === 'pendientes' && (a.validado || !a.activo)) return false;
       if (filtro === 'validados' && (!a.validado || !a.activo)) return false;
       if (filtro === 'inactivos' && a.activo) return false;
 
-      // Filtro por búsqueda
       if (busqueda) {
         const q = busqueda.toLowerCase();
         return (
@@ -116,7 +105,6 @@ function GestionAsesores() {
 
   const pendientes = asesores.filter((a) => !a.validado && a.activo).length;
 
-  // ============ RENDER ============
   return (
     <>
       <div className="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
@@ -127,7 +115,7 @@ function GestionAsesores() {
           </p>
         </div>
         <Button variant="outline-secondary" size="sm" onClick={cargarAsesores}>
-          🔄 Recargar
+          <i className="bi bi-arrow-clockwise me-1"></i> Recargar
         </Button>
       </div>
 
@@ -142,7 +130,6 @@ function GestionAsesores() {
         </Alert>
       )}
 
-      {/* Filtros */}
       <Card className="border-0 shadow-sm mb-4">
         <Card.Body>
           <div className="d-flex gap-3 flex-wrap align-items-center">
@@ -185,12 +172,13 @@ function GestionAsesores() {
         </Card.Body>
       </Card>
 
-      {/* Tabla */}
       {cargando ? (
         <LoadingSpinner mensaje="Cargando asesores..." />
       ) : asesoresFiltrados.length === 0 ? (
         <Alert variant="info" className="text-center">
-          <div style={{ fontSize: '2.5rem' }}>📭</div>
+          <div style={{ fontSize: '2.5rem', color: 'var(--azul-primario)' }}>
+            <i className="bi bi-inbox"></i>
+          </div>
           <h5 className="fw-bold text-azul mb-1">Sin resultados</h5>
           <p className="text-suave mb-0 small">
             {asesores.length === 0
@@ -236,17 +224,23 @@ function GestionAsesores() {
                       </td>
                       <td className="small">{a.matricula}</td>
                       <td className="text-center">
-                        <Badge className="btn-amarillo text-dark fw-normal">
-                          ⭐ {a.promedio}
+                        <Badge className="badge-promedio">
+                          <i className="bi bi-star-fill"></i> {a.promedio}
                         </Badge>
                       </td>
                       <td className="text-center">
                         {!a.activo ? (
-                          <Badge bg="danger">Inactivo</Badge>
+                          <Badge bg="danger">
+                            <i className="bi bi-slash-circle me-1"></i>Inactivo
+                          </Badge>
                         ) : a.validado ? (
-                          <Badge bg="success">Validado</Badge>
+                          <Badge bg="success">
+                            <i className="bi bi-check-circle-fill me-1"></i>Validado
+                          </Badge>
                         ) : (
-                          <Badge bg="warning" text="dark">Pendiente</Badge>
+                          <Badge bg="warning" text="dark">
+                            <i className="bi bi-hourglass-split me-1"></i>Pendiente
+                          </Badge>
                         )}
                       </td>
                       <td className="text-end">
@@ -264,7 +258,9 @@ function GestionAsesores() {
                                   Validando
                                 </>
                               ) : (
-                                <>✅ Validar</>
+                                <>
+                                  <i className="bi bi-check-circle me-1"></i> Validar
+                                </>
                               )}
                             </Button>
                           )}
@@ -276,7 +272,7 @@ function GestionAsesores() {
                               disabled={enCurso}
                               title="Revocar validación (el usuario vuelve a ser alumno)"
                             >
-                              ↩️ Revocar
+                              <i className="bi bi-arrow-counterclockwise me-1"></i> Revocar
                             </Button>
                           )}
                           {a.activo && (
@@ -287,7 +283,7 @@ function GestionAsesores() {
                               disabled={enCurso}
                               title="Dar de baja definitivamente"
                             >
-                              🚫
+                              <i className="bi bi-slash-circle"></i>
                             </Button>
                           )}
                         </div>
@@ -301,14 +297,14 @@ function GestionAsesores() {
         </Card>
       )}
 
-      {/* Modal de confirmación para dar de baja */}
       <Modal
         show={modalBaja.show}
         onHide={() => setModalBaja({ show: false, asesor: null })}
       >
         <Modal.Header closeButton>
           <Modal.Title className="fw-bold text-danger">
-            ⚠️ Confirmar baja de asesor
+            <i className="bi bi-exclamation-triangle-fill me-2"></i>
+            Confirmar baja de asesor
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -329,7 +325,7 @@ function GestionAsesores() {
             Cancelar
           </Button>
           <Button variant="danger" onClick={handleBaja}>
-            Sí, dar de baja
+            <i className="bi bi-slash-circle me-1"></i> Sí, dar de baja
           </Button>
         </Modal.Footer>
       </Modal>

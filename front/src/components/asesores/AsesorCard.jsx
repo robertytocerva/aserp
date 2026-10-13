@@ -10,7 +10,6 @@ function AsesorCard({ asesor }) {
   ];
   const colorAvatar = coloresAvatar[(asesor.idAsesor || 0) % coloresAvatar.length];
 
-  // Soporta tanto mocks (m.nombre) como backend real (m.nombreMateria)
   const obtenerNombreMateria = (m) => m.nombre || m.nombreMateria || 'Materia';
 
   return (
@@ -39,12 +38,12 @@ function AsesorCard({ asesor }) {
         </div>
 
         <div className="d-flex align-items-center gap-2 mb-3">
-          <Badge className="btn-amarillo text-dark">
-            ⭐ Promedio {asesor.promedio}
+          <Badge className="badge-promedio">
+            <i className="bi bi-star-fill"></i> Promedio {asesor.promedio}
           </Badge>
           {asesor.validado && (
             <Badge bg="success" className="fw-normal">
-              ✓ Validado
+              <i className="bi bi-patch-check-fill me-1"></i> Validado
             </Badge>
           )}
         </div>

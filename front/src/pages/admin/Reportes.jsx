@@ -1,205 +1,152 @@
-import { useState } from 'react';
-import { Card, Row, Col, ProgressBar, Table, Badge, Button, Alert } from 'react-bootstrap';
-import { reportesMock } from '../../mocks/reportesMock';
+import { Card, Alert } from 'react-bootstrap';
 
 function Reportes() {
-  const [periodo, setPeriodo] = useState('semestre');
-  const r = reportesMock;
-
-  // Cálculo de máximo para barras proporcionales
-  const maxAsesoriasMes = Math.max(...r.asesoriasPorMes.map((x) => x.total));
-  const maxAsesoriasMateria = Math.max(...r.asesoriasPorMateria.map((x) => x.total));
-
   return (
     <>
-      <div className="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
-        <div>
-          <h2 className="fw-bold text-azul mb-1">Reportes y estadísticas</h2>
-          <p className="text-suave mb-0">
-            Consulta el desempeño y uso del programa de asesores pares.
-          </p>
-        </div>
-        <div className="d-flex gap-2">
-          <Button variant="outline-primary" size="sm">
-            📥 Exportar PDF
-          </Button>
-          <Button variant="outline-success" size="sm">
-            📊 Exportar Excel
-          </Button>
-        </div>
+      <div className="mb-4">
+        <h2 className="fw-bold text-azul mb-1">Reportes y estadísticas</h2>
+        <p className="text-suave mb-0">
+          Consulta el desempeño y uso del programa de asesores pares.
+        </p>
       </div>
 
-      <Alert variant="warning" className="small">
-        <strong>⚠️ Datos de prueba:</strong> Los reportes se generarán con datos
-        reales cuando el backend implemente el endpoint correspondiente.
-      </Alert>
+      <Card className="border-0 shadow-sm">
+        <Card.Body className="text-center py-5">
+          <div
+            className="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+            style={{
+              width: '90px',
+              height: '90px',
+              backgroundColor: 'var(--azul-suave)',
+              color: 'var(--azul-primario)',
+              fontSize: '2.5rem',
+            }}
+          >
+            <i className="bi bi-graph-up-arrow"></i>
+          </div>
+          <h4 className="fw-bold text-azul mb-2">Sección en construcción</h4>
+          <p
+            className="text-suave mb-4"
+            style={{ maxWidth: '600px', margin: '0 auto' }}
+          >
+            Los reportes estadísticos del programa se generarán automáticamente a
+            partir de los datos de asesorías, bitácoras y participación de los
+            asesores. Esta pantalla se habilitará cuando el backend implemente el
+            endpoint correspondiente.
+          </p>
 
-      {/* ============ RESUMEN ============ */}
-      <Row className="g-3 mb-4">
-        <Col sm={6} lg={3}>
-          <Card className="border-0 shadow-sm text-center h-100">
+          <Alert
+            variant="info"
+            className="text-start mx-auto"
+            style={{ maxWidth: '600px' }}
+          >
+            <div className="fw-bold mb-2">
+              <i className="bi bi-info-circle-fill me-2"></i>
+              Información para el equipo
+            </div>
+            <p className="small mb-2">
+              <strong>Endpoint requerido:</strong>
+            </p>
+            <code
+              className="d-block small p-2 rounded"
+              style={{ backgroundColor: 'var(--fondo)' }}
+            >
+              GET /api/admin/reportes
+            </code>
+            <p className="small mt-2 mb-0">
+              <strong>Headers:</strong> Authorization: Bearer &lt;token-admin&gt;
+              <br />
+              <strong>Datos esperados:</strong> totalAsesorias, totalAsesores,
+              totalAlumnos, promedioCalificacion, asesoriasPorMes,
+              asesoriasPorMateria, asesoriasPorEstado, topAsesores.
+            </p>
+          </Alert>
+
+          <div className="mt-4">
+            <a
+              href="https://github.com/robertytocerva/aserp/blob/main/back/docEndpoit.md"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-outline-primary"
+            >
+              <i className="bi bi-file-text me-1"></i>
+              Ver documentación de endpoints
+            </a>
+          </div>
+        </Card.Body>
+      </Card>
+
+      {/* Cards con vistas previstas */}
+      <div className="row g-3 mt-4">
+        <div className="col-md-4">
+          <Card className="border-0 shadow-sm h-100 text-center">
             <Card.Body>
-              <div style={{ fontSize: '2rem' }}>📚</div>
-              <div className="display-5 fw-bold text-azul">
-                {r.resumen.totalAsesorias}
+              <div
+                className="d-inline-flex align-items-center justify-content-center rounded-circle mb-2"
+                style={{
+                  width: '60px',
+                  height: '60px',
+                  backgroundColor: 'var(--azul-suave)',
+                  color: 'var(--azul-primario)',
+                  fontSize: '1.5rem',
+                }}
+              >
+                <i className="bi bi-book-fill"></i>
               </div>
-              <div className="text-suave small">Asesorías totales</div>
+              <h6 className="fw-bold text-azul">Por materia</h6>
+              <p className="text-suave small mb-0">
+                Materias con mayor demanda de asesorías.
+              </p>
             </Card.Body>
           </Card>
-        </Col>
-        <Col sm={6} lg={3}>
-          <Card className="border-0 shadow-sm text-center h-100">
+        </div>
+
+        <div className="col-md-4">
+          <Card className="border-0 shadow-sm h-100 text-center">
             <Card.Body>
-              <div style={{ fontSize: '2rem' }}>🎓</div>
-              <div className="display-5 fw-bold text-success">
-                {r.resumen.totalAsesores}
+              <div
+                className="d-inline-flex align-items-center justify-content-center rounded-circle mb-2"
+                style={{
+                  width: '60px',
+                  height: '60px',
+                  backgroundColor: 'var(--azul-suave)',
+                  color: 'var(--azul-primario)',
+                  fontSize: '1.5rem',
+                }}
+              >
+                <i className="bi bi-calendar-event-fill"></i>
               </div>
-              <div className="text-suave small">Asesores activos</div>
+              <h6 className="fw-bold text-azul">Por periodo</h6>
+              <p className="text-suave small mb-0">
+                Tendencia de asesorías mes a mes.
+              </p>
             </Card.Body>
           </Card>
-        </Col>
-        <Col sm={6} lg={3}>
-          <Card className="border-0 shadow-sm text-center h-100">
+        </div>
+
+        <div className="col-md-4">
+          <Card className="border-0 shadow-sm h-100 text-center">
             <Card.Body>
-              <div style={{ fontSize: '2rem' }}>👥</div>
-              <div className="display-5 fw-bold text-warning">
-                {r.resumen.totalAlumnos}
+              <div
+                className="d-inline-flex align-items-center justify-content-center rounded-circle mb-2"
+                style={{
+                  width: '60px',
+                  height: '60px',
+                  backgroundColor: 'var(--azul-suave)',
+                  color: 'var(--azul-primario)',
+                  fontSize: '1.5rem',
+                }}
+              >
+                <i className="bi bi-trophy-fill"></i>
               </div>
-              <div className="text-suave small">Alumnos atendidos</div>
+              <h6 className="fw-bold text-azul">Top asesores</h6>
+              <p className="text-suave small mb-0">
+                Ranking por asesorías y calificación.
+              </p>
             </Card.Body>
           </Card>
-        </Col>
-        <Col sm={6} lg={3}>
-          <Card className="border-0 shadow-sm text-center h-100">
-            <Card.Body>
-              <div style={{ fontSize: '2rem' }}>⭐</div>
-              <div className="display-5 fw-bold text-azul">
-                {r.resumen.promedioCalificacion}
-              </div>
-              <div className="text-suave small">Satisfacción promedio</div>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-
-      <Row className="g-4">
-        {/* ============ ASESORÍAS POR MES ============ */}
-        <Col lg={7}>
-          <Card className="border-0 shadow-sm h-100">
-            <Card.Body>
-              <h5 className="fw-bold text-azul mb-3">
-                📈 Asesorías por mes
-              </h5>
-              {r.asesoriasPorMes.map((m) => (
-                <div key={m.mes} className="mb-3">
-                  <div className="d-flex justify-content-between small mb-1">
-                    <span className="fw-semibold">{m.mes}</span>
-                    <span className="text-suave">{m.total} asesorías</span>
-                  </div>
-                  <ProgressBar
-                    now={(m.total / maxAsesoriasMes) * 100}
-                    style={{ height: '10px' }}
-                  />
-                </div>
-              ))}
-            </Card.Body>
-          </Card>
-        </Col>
-
-        {/* ============ ESTADOS ============ */}
-        <Col lg={5}>
-          <Card className="border-0 shadow-sm h-100">
-            <Card.Body>
-              <h5 className="fw-bold text-azul mb-3">
-                📊 Distribución por estado
-              </h5>
-              {r.asesoriasPorEstado.map((e) => {
-                const totalEstados = r.asesoriasPorEstado.reduce(
-                  (acc, x) => acc + x.total,
-                  0
-                );
-                const pct = ((e.total / totalEstados) * 100).toFixed(0);
-                return (
-                  <div
-                    key={e.estado}
-                    className="d-flex justify-content-between align-items-center mb-2 p-2 rounded"
-                    style={{ backgroundColor: 'var(--fondo)' }}
-                  >
-                    <div className="d-flex align-items-center gap-2">
-                      <Badge bg={e.color} className="fw-normal">
-                        {e.estado}
-                      </Badge>
-                    </div>
-                    <div className="fw-semibold">
-                      {e.total}{' '}
-                      <span className="text-suave small">({pct}%)</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </Card.Body>
-          </Card>
-        </Col>
-
-        {/* ============ TOP ASESORES ============ */}
-        <Col lg={6}>
-          <Card className="border-0 shadow-sm h-100">
-            <Card.Body>
-              <h5 className="fw-bold text-azul mb-3">
-                🏆 Top asesores del semestre
-              </h5>
-              <Table hover className="mb-0 align-middle">
-                <thead>
-                  <tr>
-                    <th className="small fw-semibold">#</th>
-                    <th className="small fw-semibold">Asesor</th>
-                    <th className="small fw-semibold text-center">Asesorías</th>
-                    <th className="small fw-semibold text-center">⭐</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {r.topAsesores.map((a, i) => (
-                    <tr key={i}>
-                      <td>
-                        <Badge bg={i === 0 ? 'warning' : i === 1 ? 'secondary' : 'light'} text={i < 2 ? 'dark' : 'dark'}>
-                          {i + 1}
-                        </Badge>
-                      </td>
-                      <td className="small fw-semibold">{a.nombre}</td>
-                      <td className="text-center small">{a.asesorias}</td>
-                      <td className="text-center small">{a.calificacion}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            </Card.Body>
-          </Card>
-        </Col>
-
-        {/* ============ MATERIAS MÁS SOLICITADAS ============ */}
-        <Col lg={6}>
-          <Card className="border-0 shadow-sm h-100">
-            <Card.Body>
-              <h5 className="fw-bold text-azul mb-3">
-                📚 Materias más solicitadas
-              </h5>
-              {r.asesoriasPorMateria.map((m) => (
-                <div key={m.materia} className="mb-3">
-                  <div className="d-flex justify-content-between small mb-1">
-                    <span>{m.materia}</span>
-                    <span className="text-suave">{m.total}</span>
-                  </div>
-                  <ProgressBar
-                    now={(m.total / maxAsesoriasMateria) * 100}
-                    variant="warning"
-                    style={{ height: '8px' }}
-                  />
-                </div>
-              ))}
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+        </div>
+      </div>
     </>
   );
 }

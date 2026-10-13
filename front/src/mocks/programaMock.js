@@ -2,6 +2,7 @@
  * Contenido informativo del programa de asesores pares.
  * Basado en el PDF "Aseesor Par.pdf".
  * Las imágenes se sirven desde Unsplash (URLs directas).
+ * Los iconos usan Bootstrap Icons (clase "bi bi-...").
  */
 
 export const programaInfo = {

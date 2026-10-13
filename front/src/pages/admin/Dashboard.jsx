@@ -44,7 +44,10 @@ function Dashboard() {
               <Card.Body>
                 <div className="d-flex justify-content-between align-items-start mb-2">
                   <div className="text-suave small fw-semibold">PENDIENTES</div>
-                  <span style={{ fontSize: '1.5rem' }}>⏳</span>
+                  <i
+                    className="bi bi-hourglass-split"
+                    style={{ fontSize: '1.5rem', color: 'var(--amarillo-oscuro)' }}
+                  ></i>
                 </div>
                 <div className="display-5 fw-bold text-warning">{pendientes}</div>
                 <div className="text-suave small">Esperando validación</div>
@@ -57,7 +60,10 @@ function Dashboard() {
               <Card.Body>
                 <div className="d-flex justify-content-between align-items-start mb-2">
                   <div className="text-suave small fw-semibold">VALIDADOS</div>
-                  <span style={{ fontSize: '1.5rem' }}>✅</span>
+                  <i
+                    className="bi bi-patch-check-fill"
+                    style={{ fontSize: '1.5rem', color: 'var(--exito)' }}
+                  ></i>
                 </div>
                 <div className="display-5 fw-bold text-success">{validados}</div>
                 <div className="text-suave small">Asesores activos</div>
@@ -70,7 +76,10 @@ function Dashboard() {
               <Card.Body>
                 <div className="d-flex justify-content-between align-items-start mb-2">
                   <div className="text-suave small fw-semibold">INACTIVOS</div>
-                  <span style={{ fontSize: '1.5rem' }}>🚫</span>
+                  <i
+                    className="bi bi-slash-circle"
+                    style={{ fontSize: '1.5rem', color: 'var(--peligro)' }}
+                  ></i>
                 </div>
                 <div className="display-5 fw-bold text-danger">{inactivos}</div>
                 <div className="text-suave small">Dados de baja</div>
@@ -83,7 +92,10 @@ function Dashboard() {
               <Card.Body>
                 <div className="d-flex justify-content-between align-items-start mb-2">
                   <div className="text-suave small fw-semibold">TOTAL</div>
-                  <span style={{ fontSize: '1.5rem' }}>👥</span>
+                  <i
+                    className="bi bi-people-fill"
+                    style={{ fontSize: '1.5rem', color: 'var(--azul-primario)' }}
+                  ></i>
                 </div>
                 <div className="display-5 fw-bold text-azul">{asesores.length}</div>
                 <div className="text-suave small">Registrados</div>
@@ -103,7 +115,10 @@ function Dashboard() {
                   to="/admin/asesores"
                   className="alert alert-warning d-flex align-items-center gap-3 text-decoration-none mb-0"
                 >
-                  <span style={{ fontSize: '1.5rem' }}>⚠️</span>
+                  <i
+                    className="bi bi-exclamation-triangle-fill"
+                    style={{ fontSize: '1.5rem' }}
+                  ></i>
                   <div>
                     <div className="fw-bold">
                       Tienes {pendientes}{' '}
@@ -113,8 +128,9 @@ function Dashboard() {
                   </div>
                 </Link>
               ) : (
-                <div className="alert alert-success mb-0">
-                  ✅ No hay asesores pendientes de validación
+                <div className="alert alert-success mb-0 d-flex align-items-center gap-2">
+                  <i className="bi bi-check-circle-fill"></i>
+                  <span>No hay asesores pendientes de validación</span>
                 </div>
               )}
             </Card.Body>
@@ -127,13 +143,16 @@ function Dashboard() {
               <h5 className="fw-bold text-azul mb-3">Enlaces útiles</h5>
               <div className="d-flex flex-column gap-2">
                 <Link to="/admin/materias" className="text-decoration-none">
-                  📚 Gestionar materias y carreras
+                  <i className="bi bi-book-fill me-2 text-azul"></i>
+                  Gestionar materias y carreras
                 </Link>
                 <Link to="/admin/asesores" className="text-decoration-none">
-                  🎓 Ver todos los asesores
+                  <i className="bi bi-mortarboard-fill me-2 text-azul"></i>
+                  Ver todos los asesores
                 </Link>
                 <Link to="/admin/reportes" className="text-decoration-none">
-                  📈 Generar reportes
+                  <i className="bi bi-graph-up-arrow me-2 text-azul"></i>
+                  Generar reportes
                 </Link>
               </div>
             </Card.Body>

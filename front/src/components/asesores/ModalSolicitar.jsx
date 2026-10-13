@@ -9,16 +9,6 @@ import {
 } from 'react-bootstrap';
 import { solicitudesApi } from '../../api/solicitudesApi';
 
-/**
- * Modal para confirmar la solicitud de una asesoría.
- *
- * Props:
- *   show: boolean
- *   onHide: () => void
- *   slot: { idHorario, fecha, horaInicio, horaFin, modalidad, lugar }
- *   asesor: { idAsesor, nombreAlumno, materias: [...] }
- *   onSuccess: () => void
- */
 function ModalSolicitar({ show, onHide, slot, asesor, onSuccess }) {
   const [idMateria, setIdMateria] = useState('');
   const [error, setError] = useState('');
@@ -26,7 +16,6 @@ function ModalSolicitar({ show, onHide, slot, asesor, onSuccess }) {
 
   const materias = asesor?.materias || [];
 
-  // Reset cuando se abre/cierra
   const handleHide = () => {
     if (enviando) return;
     setIdMateria('');
@@ -64,7 +53,6 @@ function ModalSolicitar({ show, onHide, slot, asesor, onSuccess }) {
 
   if (!slot) return null;
 
-  // Formatear fecha
   const [year, month, day] = slot.fecha.split('-').map(Number);
   const fecha = new Date(year, month - 1, day);
   const fechaLarga = fecha.toLocaleDateString('es-MX', {
@@ -77,7 +65,8 @@ function ModalSolicitar({ show, onHide, slot, asesor, onSuccess }) {
     <Modal show={show} onHide={handleHide} centered backdrop={enviando ? 'static' : true}>
       <Modal.Header closeButton={!enviando}>
         <Modal.Title className="fw-bold text-azul">
-          📝 Solicitar asesoría
+          <i className="bi bi-pencil-square me-2"></i>
+          Solicitar asesoría
         </Modal.Title>
       </Modal.Header>
 
@@ -89,7 +78,6 @@ function ModalSolicitar({ show, onHide, slot, asesor, onSuccess }) {
             </Alert>
           )}
 
-          {/* Resumen del slot */}
           <div
             className="p-3 rounded mb-3"
             style={{ backgroundColor: 'var(--azul-suave)' }}
@@ -117,7 +105,6 @@ function ModalSolicitar({ show, onHide, slot, asesor, onSuccess }) {
             </ListGroup>
           </div>
 
-          {/* Selección de materia */}
           <Form.Group>
             <Form.Label className="fw-semibold small">
               Materia de la asesoría *
@@ -144,11 +131,7 @@ function ModalSolicitar({ show, onHide, slot, asesor, onSuccess }) {
         </Modal.Body>
 
         <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={handleHide}
-            disabled={enviando}
-          >
+          <Button variant="secondary" onClick={handleHide} disabled={enviando}>
             Cancelar
           </Button>
           <Button

@@ -19,17 +19,11 @@ function SolicitudesRecibidas() {
   const [error, setError] = useState('');
   const [exito, setExito] = useState('');
 
-  // Filtros
   const [filtro, setFiltro] = useState('pendientes');
   const [busqueda, setBusqueda] = useState('');
-
-  // Acciones en curso
   const [accionesEnCurso, setAccionesEnCurso] = useState({});
-
-  // Modal de confirmación de rechazo
   const [modalRechazar, setModalRechazar] = useState({ show: false, solicitud: null });
 
-  // ============ CARGA ============
   const cargar = async () => {
     setCargando(true);
     setError('');
@@ -47,7 +41,6 @@ function SolicitudesRecibidas() {
     cargar();
   }, []);
 
-  // ============ ACCIONES ============
   const handleAceptar = async (solicitud) => {
     setAccionesEnCurso((prev) => ({ ...prev, [solicitud.idAsesoria]: true }));
     setError('');
@@ -58,7 +51,7 @@ function SolicitudesRecibidas() {
         prev.map((s) => (s.idAsesoria === solicitud.idAsesoria ? actualizada : s))
       );
       setExito(
-        `✅ Solicitud de ${solicitud.nombreAlumno} aceptada. La asesoría está programada.`
+        `Solicitud de ${solicitud.nombreAlumno} aceptada. La asesoría está programada.`
       );
     } catch (err) {
       setError(err.mensaje || 'No se pudo aceptar la solicitud.');
@@ -79,7 +72,7 @@ function SolicitudesRecibidas() {
       setSolicitudes((prev) =>
         prev.map((s) => (s.idAsesoria === solicitud.idAsesoria ? actualizada : s))
       );
-      setExito(`❌ Solicitud de ${solicitud.nombreAlumno} rechazada.`);
+      setExito(`Solicitud de ${solicitud.nombreAlumno} rechazada.`);
     } catch (err) {
       setError(err.mensaje || 'No se pudo rechazar la solicitud.');
     } finally {
@@ -88,10 +81,8 @@ function SolicitudesRecibidas() {
     }
   };
 
-  // ============ FILTRADO ============
   const solicitudesFiltradas = useMemo(() => {
     return solicitudes.filter((s) => {
-      // Filtro por estado
       if (filtro === 'pendientes' && s.estado !== 'solicitada') return false;
       if (filtro === 'programadas' && s.estado !== 'programada') return false;
       if (filtro === 'historial') {
@@ -99,7 +90,6 @@ function SolicitudesRecibidas() {
           return false;
       }
 
-      // Búsqueda
       if (busqueda) {
         const q = busqueda.toLowerCase();
         return (
@@ -123,7 +113,6 @@ function SolicitudesRecibidas() {
     };
   }, [solicitudes]);
 
-  // ============ RENDER ============
   return (
     <>
       <div className="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
@@ -134,7 +123,7 @@ function SolicitudesRecibidas() {
           </p>
         </div>
         <Button variant="outline-secondary" size="sm" onClick={cargar}>
-          🔄 Recargar
+          <i className="bi bi-arrow-clockwise me-1"></i> Recargar
         </Button>
       </div>
 
@@ -149,31 +138,32 @@ function SolicitudesRecibidas() {
         </Alert>
       )}
 
-      {/* Filtros */}
       <div className="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-3">
         <ButtonGroup size="sm">
           <Button
             variant={filtro === 'pendientes' ? 'warning' : 'outline-warning'}
             onClick={() => setFiltro('pendientes')}
           >
-            ⏳ Pendientes ({contadores.pendientes})
+            <i className="bi bi-hourglass-split me-1"></i> Pendientes ({contadores.pendientes})
           </Button>
           <Button
             variant={filtro === 'programadas' ? 'success' : 'outline-success'}
             onClick={() => setFiltro('programadas')}
           >
-            ✅ Programadas ({contadores.programadas})
+            <i className="bi bi-check-circle-fill me-1"></i> Programadas ({contadores.programadas})
           </Button>
           <Button
             variant={filtro === 'historial' ? 'secondary' : 'outline-secondary'}
             onClick={() => setFiltro('historial')}
           >
-            📜 Historial ({contadores.historial})
+            <i className="bi bi-clock-history me-1"></i> Historial ({contadores.historial})
           </Button>
         </ButtonGroup>
 
         <InputGroup size="sm" style={{ maxWidth: '300px' }}>
-          <InputGroup.Text className="bg-white border-end-0">🔍</InputGroup.Text>
+          <InputGroup.Text className="bg-white border-end-0">
+            <i className="bi bi-search"></i>
+          </InputGroup.Text>
           <Form.Control
             placeholder="Buscar por alumno o materia..."
             value={busqueda}
@@ -183,12 +173,13 @@ function SolicitudesRecibidas() {
         </InputGroup>
       </div>
 
-      {/* Contenido */}
       {cargando ? (
         <LoadingSpinner mensaje="Cargando solicitudes..." />
       ) : solicitudesFiltradas.length === 0 ? (
         <Alert variant="info" className="text-center py-5">
-          <div style={{ fontSize: '3rem' }}>📭</div>
+          <div style={{ fontSize: '3rem', color: 'var(--azul-primario)' }}>
+            <i className="bi bi-inbox"></i>
+          </div>
           <h5 className="fw-bold text-azul mb-2">
             {solicitudes.length === 0
               ? 'Aún no has recibido solicitudes'
@@ -215,7 +206,6 @@ function SolicitudesRecibidas() {
         </Row>
       )}
 
-      {/* Modal de confirmación de rechazo */}
       <Modal
         show={modalRechazar.show}
         onHide={() => setModalRechazar({ show: false, solicitud: null })}
@@ -223,7 +213,7 @@ function SolicitudesRecibidas() {
       >
         <Modal.Header closeButton>
           <Modal.Title className="fw-bold text-danger">
-            ❌ Confirmar rechazo
+            <i className="bi bi-x-circle-fill me-2"></i>Confirmar rechazo
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -243,7 +233,7 @@ function SolicitudesRecibidas() {
             Cancelar
           </Button>
           <Button variant="danger" onClick={handleRechazar}>
-            Sí, rechazar
+            <i className="bi bi-x-circle me-1"></i> Sí, rechazar
           </Button>
         </Modal.Footer>
       </Modal>

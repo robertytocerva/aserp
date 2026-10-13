@@ -121,10 +121,10 @@ function GestionMaterias() {
 
       if (modalMateria.editando) {
         await adminApi.actualizarMateria(modalMateria.editando.idMateria, payload);
-        setExito('✅ Materia actualizada correctamente.');
+        setExito('<i className="bi bi-check-circle me-1"></i> Materia actualizada correctamente.');
       } else {
         await adminApi.crearMateria(payload);
-        setExito('✅ Materia creada correctamente.');
+        setExito('<i className="bi bi-check-circle me-1"></i> Materia creada correctamente.');
       }
       setModalMateria({ show: false, editando: null });
       cargar();
@@ -167,10 +167,10 @@ function GestionMaterias() {
 
       if (modalCarrera.editando) {
         await adminApi.actualizarCarrera(modalCarrera.editando.idCarrera, payload);
-        setExito('✅ Carrera actualizada correctamente.');
+        setExito('<i className="bi bi-check-circle me-1"></i> Carrera actualizada correctamente.');
       } else {
         await adminApi.crearCarrera(payload);
-        setExito('✅ Carrera creada correctamente.');
+        setExito('<i className="bi bi-check-circle me-1"></i> Carrera creada correctamente.');
       }
       setModalCarrera({ show: false, editando: null });
       cargar();
@@ -196,10 +196,10 @@ function GestionMaterias() {
     try {
       if (tipo === 'materia') {
         await adminApi.eliminarMateria(item.idMateria);
-        setExito('🗑️ Materia eliminada correctamente.');
+        setExito('<i className="bi bi-trash me-1"></i> Materia eliminada correctamente.');
       } else {
         await adminApi.eliminarCarrera(item.idCarrera);
-        setExito('🗑️ Carrera eliminada correctamente.');
+        setExito('<i className="bi bi-trash me-1"></i> Carrera eliminada correctamente.');
       }
       setModalEliminar({ show: false, tipo: null, item: null });
       cargar();
@@ -235,7 +235,7 @@ function GestionMaterias() {
           </p>
         </div>
         <Button variant="outline-secondary" size="sm" onClick={cargar}>
-          🔄 Recargar
+          <i className="bi bi-arrow-clockwise me-1"></i> Recargar
         </Button>
       </div>
 
@@ -255,7 +255,7 @@ function GestionMaterias() {
       ) : (
         <Tabs defaultActiveKey="materias" className="mb-3">
           {/* ============ TAB MATERIAS ============ */}
-          <Tab eventKey="materias" title={`📚 Materias (${materias.length})`}>
+          <Tab eventKey="materias" title={<span><i className="bi bi-book-fill me-1"></i> Materias ({materias.length})</span>}>
             <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
               <div className="d-flex gap-2">
                 <Form.Select
@@ -281,7 +281,7 @@ function GestionMaterias() {
                 />
               </div>
               <Button className="btn-amarillo" size="sm" onClick={abrirCrearMateria}>
-                ➕ Nueva materia
+                <i className="bi bi-plus-circle me-1"></i> Nueva materia
               </Button>
             </div>
 
@@ -326,7 +326,7 @@ function GestionMaterias() {
                               onClick={() => abrirEditarMateria(m)}
                               title="Editar"
                             >
-                              ✏️
+                              <i className="bi bi-pencil me-1"></i> Editar
                             </Button>
                             <Button
                               size="sm"
@@ -334,7 +334,7 @@ function GestionMaterias() {
                               onClick={() => confirmarEliminar('materia', m)}
                               title="Eliminar"
                             >
-                              🗑️
+                              <i className="bi bi-trash me-1"></i> Eliminar
                             </Button>
                           </div>
                         </td>
@@ -347,10 +347,10 @@ function GestionMaterias() {
           </Tab>
 
           {/* ============ TAB CARRERAS ============ */}
-          <Tab eventKey="carreras" title={`🎓 Carreras (${carreras.length})`}>
+          <Tab eventKey="carreras" title={<span><i className="bi bi-mortarboard-fill me-1"></i> Carreras ({carreras.length})</span>}>
             <div className="d-flex justify-content-end mb-3">
               <Button className="btn-amarillo" size="sm" onClick={abrirCrearCarrera}>
-                ➕ Nueva carrera
+                <i className="bi bi-plus-circle me-1"></i> Nueva carrera
               </Button>
             </div>
 
@@ -391,7 +391,7 @@ function GestionMaterias() {
                                 onClick={() => abrirEditarCarrera(c)}
                                 title="Editar"
                               >
-                                ✏️
+                                <i className="bi bi-pencil me-1"></i> Editar
                               </Button>
                               <Button
                                 size="sm"
@@ -399,7 +399,7 @@ function GestionMaterias() {
                                 onClick={() => confirmarEliminar('carrera', c)}
                                 title="Eliminar"
                               >
-                                🗑️
+                                <i className="bi bi-trash me-1"></i> Eliminar
                               </Button>
                             </div>
                           </td>
@@ -422,7 +422,7 @@ function GestionMaterias() {
       >
         <Modal.Header closeButton>
           <Modal.Title className="fw-bold text-azul">
-            {modalMateria.editando ? '✏️ Editar materia' : '➕ Nueva materia'}
+            {modalMateria.editando ? '<i className="bi bi-pencil"></i> Editar materia' : '<i className="bi bi-plus-circle me-1"></i> Nueva materia'}
           </Modal.Title>
         </Modal.Header>
         <Form onSubmit={guardarMateria}>
@@ -575,7 +575,7 @@ function GestionMaterias() {
       >
         <Modal.Header closeButton>
           <Modal.Title className="fw-bold text-azul">
-            {modalCarrera.editando ? '✏️ Editar carrera' : '➕ Nueva carrera'}
+            {modalCarrera.editando ? '<i className="bi bi-pencil"></i> Editar carrera' : '<i className="bi bi-plus-circle"></i> Nueva carrera'}
           </Modal.Title>
         </Modal.Header>
         <Form onSubmit={guardarCarrera}>
@@ -644,7 +644,7 @@ function GestionMaterias() {
         onHide={() => setModalEliminar({ show: false, tipo: null, item: null })}
       >
         <Modal.Header closeButton>
-          <Modal.Title className="fw-bold text-danger">🗑️ Confirmar eliminación</Modal.Title>
+          <Modal.Title className="fw-bold text-danger"><i className="bi bi-trash"></i> Confirmar eliminación</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <p>

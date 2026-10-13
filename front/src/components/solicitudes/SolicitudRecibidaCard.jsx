@@ -15,7 +15,6 @@ function SolicitudRecibidaCard({
 }) {
   const estado = ESTADOS_SOLICITUD[solicitud.estado] || ESTADOS_SOLICITUD.solicitada;
 
-  // Formatear fecha
   const [year, month, day] = solicitud.fecha.split('-').map(Number);
   const fecha = new Date(year, month - 1, day);
   const diaSemana = DIAS_CORTOS[fecha.getDay()];
@@ -24,26 +23,24 @@ function SolicitudRecibidaCard({
 
   const iconoModalidad =
     solicitud.modalidad === 'virtual'
-      ? '💻'
+      ? 'bi-laptop'
       : solicitud.modalidad === 'hibrida'
-      ? '🔄'
-      : '🏫';
+      ? 'bi-arrow-repeat'
+      : 'bi-building';
 
-  // ¿Es una solicitud pendiente de acción?
   const esPendiente = solicitud.estado === 'solicitada';
 
   return (
     <Card className="border-0 shadow-sm h-100">
       <Card.Body>
-        {/* Header: Estado + Badge */}
         <div className="d-flex justify-content-between align-items-start mb-3">
           <Badge bg={estado.color} text={estado.color === 'warning' ? 'dark' : 'white'}>
-            {estado.icon} {estado.label}
+            <i className={`bi ${estado.icon} me-1`}></i>
+            {estado.label}
           </Badge>
           <div className="text-suave small">#{solicitud.idAsesoria}</div>
         </div>
 
-        {/* Alumno */}
         <div className="d-flex align-items-center gap-2 mb-3">
           <div
             className="d-flex align-items-center justify-content-center rounded-circle text-white fw-bold flex-shrink-0"
@@ -66,7 +63,6 @@ function SolicitudRecibidaCard({
           </div>
         </div>
 
-        {/* Materia */}
         <div className="mb-3 p-2 rounded" style={{ backgroundColor: 'var(--azul-suave)' }}>
           <div className="text-suave" style={{ fontSize: '0.7rem' }}>
             MATERIA SOLICITADA
@@ -76,10 +72,12 @@ function SolicitudRecibidaCard({
           </div>
         </div>
 
-        {/* Fecha y hora */}
         <div className="d-flex align-items-center gap-3 mb-2">
           <div className="d-flex align-items-center gap-2">
-            <span style={{ fontSize: '1.2rem' }}>📅</span>
+            <i
+              className="bi bi-calendar-event"
+              style={{ fontSize: '1.2rem', color: 'var(--azul-primario)' }}
+            ></i>
             <div>
               <div className="fw-semibold small">
                 {diaSemana} {diaNum} {mes} {year}
@@ -91,16 +89,14 @@ function SolicitudRecibidaCard({
           </div>
         </div>
 
-        {/* Modalidad + lugar */}
         <div className="d-flex align-items-center gap-2 text-suave small mb-3">
-          <span>{iconoModalidad}</span>
+          <i className={`bi ${iconoModalidad}`}></i>
           <span>
             {solicitud.modalidad?.charAt(0).toUpperCase() + solicitud.modalidad?.slice(1)}
             {solicitud.lugar && ` · ${solicitud.lugar}`}
           </span>
         </div>
 
-        {/* Botones según estado */}
         {esPendiente ? (
           <div className="d-flex gap-2">
             <Button
@@ -115,7 +111,9 @@ function SolicitudRecibidaCard({
                   Procesando...
                 </>
               ) : (
-                <>✅ Aceptar</>
+                <>
+                  <i className="bi bi-check-circle me-1"></i> Aceptar
+                </>
               )}
             </Button>
             <Button
@@ -125,7 +123,7 @@ function SolicitudRecibidaCard({
               onClick={() => onRechazar?.(solicitud)}
               disabled={accionesEnCurso}
             >
-              ❌ Rechazar
+              <i className="bi bi-x-circle me-1"></i> Rechazar
             </Button>
           </div>
         ) : (

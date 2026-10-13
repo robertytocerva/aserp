@@ -23,9 +23,8 @@ function Agenda() {
   const [solicitudes, setSolicitudes] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
-  const [vista, setVista] = useState('programadas'); // programadas | completadas
+  const [vista, setVista] = useState('programadas');
 
-  // ============ CARGA ============
   const cargar = async () => {
     setCargando(true);
     setError('');
@@ -43,7 +42,6 @@ function Agenda() {
     cargar();
   }, []);
 
-  // ============ FILTRAR Y AGRUPAR ============
   const solicitudesFiltradas = useMemo(() => {
     if (vista === 'programadas') {
       return solicitudes.filter((s) => s.estado === 'programada');
@@ -54,14 +52,12 @@ function Agenda() {
     }
   }, [solicitudes, vista]);
 
-  // Agrupar por fecha
   const agrupadasPorFecha = useMemo(() => {
     const grupos = {};
     solicitudesFiltradas.forEach((s) => {
       if (!grupos[s.fecha]) grupos[s.fecha] = [];
       grupos[s.fecha].push(s);
     });
-    // Ordenar fechas
     const fechasOrdenadas = Object.keys(grupos).sort((a, b) =>
       vista === 'programadas' ? a.localeCompare(b) : b.localeCompare(a)
     );
@@ -73,7 +69,6 @@ function Agenda() {
     }));
   }, [solicitudesFiltradas, vista]);
 
-  // ============ HELPERS ============
   const formatearFecha = (fechaStr) => {
     const [year, month, day] = fechaStr.split('-').map(Number);
     const fecha = new Date(year, month - 1, day);
@@ -94,7 +89,6 @@ function Agenda() {
     return fecha >= hoy;
   };
 
-  // ============ RENDER ============
   return (
     <>
       <div className="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
@@ -105,7 +99,7 @@ function Agenda() {
           </p>
         </div>
         <Button variant="outline-secondary" size="sm" onClick={cargar}>
-          🔄 Recargar
+          <i className="bi bi-arrow-clockwise me-1"></i> Recargar
         </Button>
       </div>
 
@@ -115,31 +109,34 @@ function Agenda() {
         </Alert>
       )}
 
-      {/* Selector de vista */}
       <ButtonGroup className="mb-4">
         <Button
           variant={vista === 'programadas' ? 'primary' : 'outline-primary'}
           onClick={() => setVista('programadas')}
         >
-          🗓️ Próximas ({solicitudes.filter((s) => s.estado === 'programada').length})
+          <i className="bi bi-calendar-week-fill me-1"></i> Próximas (
+          {solicitudes.filter((s) => s.estado === 'programada').length})
         </Button>
         <Button
           variant={vista === 'completadas' ? 'primary' : 'outline-primary'}
           onClick={() => setVista('completadas')}
         >
-          📜 Historial (
+          <i className="bi bi-clock-history me-1"></i> Historial (
           {solicitudes.filter((s) => ['completada', 'no_asistio'].includes(s.estado)).length}
           )
         </Button>
       </ButtonGroup>
 
-      {/* Contenido */}
       {cargando ? (
         <LoadingSpinner mensaje="Cargando tu agenda..." />
       ) : agrupadasPorFecha.length === 0 ? (
         <Alert variant="info" className="text-center py-5">
-          <div style={{ fontSize: '3rem' }}>
-            {vista === 'programadas' ? '📅' : '📜'}
+          <div style={{ fontSize: '3rem', color: 'var(--azul-primario)' }}>
+            <i
+              className={
+                vista === 'programadas' ? 'bi bi-calendar-x' : 'bi bi-clock-history'
+              }
+            ></i>
           </div>
           <h5 className="fw-bold text-azul mb-2">
             {vista === 'programadas'
@@ -156,7 +153,6 @@ function Agenda() {
         <div className="d-flex flex-column gap-4">
           {agrupadasPorFecha.map(({ fecha, solicitudes: lista }) => (
             <div key={fecha}>
-              {/* Encabezado del día */}
               <div className="d-flex align-items-center gap-2 mb-3">
                 <h6 className="fw-bold text-azul mb-0">
                   {formatearFecha(fecha)}
@@ -169,7 +165,6 @@ function Agenda() {
                 )}
               </div>
 
-              {/* Asesorías del día */}
               <Row className="g-3">
                 {lista.map((s) => (
                   <Col key={s.idAsesoria} md={6}>
@@ -196,10 +191,14 @@ function Agenda() {
                               {s.nombreMateria}
                             </div>
                             <div className="text-suave small">
-                              👤 {s.nombreAlumno}
+                              <i className="bi bi-person-fill me-1"></i>
+                              {s.nombreAlumno}
                             </div>
                             {s.matricula && (
-                              <div className="text-suave" style={{ fontSize: '0.7rem' }}>
+                              <div
+                                className="text-suave"
+                                style={{ fontSize: '0.7rem' }}
+                              >
                                 Matrícula: {s.matricula}
                               </div>
                             )}
@@ -208,24 +207,40 @@ function Agenda() {
 
                         <div className="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
                           <div className="text-suave small">
-                            {s.modalidad === 'virtual'
-                              ? '💻 Virtual'
-                              : s.modalidad === 'hibrida'
-                              ? '🔄 Híbrida'
-                              : '🏫 Presencial'}
+                            {s.modalidad === 'virtual' ? (
+                              <>
+                                <i className="bi bi-laptop me-1"></i>Virtual
+                              </>
+                            ) : s.modalidad === 'hibrida' ? (
+                              <>
+                                <i className="bi bi-arrow-repeat me-1"></i>Híbrida
+                              </>
+                            ) : (
+                              <>
+                                <i className="bi bi-building me-1"></i>Presencial
+                              </>
+                            )}
                             {s.lugar && ` · ${s.lugar}`}
                           </div>
                           <Badge
                             bg={s.estado === 'programada' ? 'success' : 'secondary'}
                             className="fw-normal"
                           >
-                            {s.estado === 'programada'
-                              ? '✅ Programada'
-                              : s.estado === 'completada'
-                              ? '🎓 Completada'
-                              : s.estado === 'no_asistio'
-                              ? '👻 No asistió'
-                              : s.estado}
+                            {s.estado === 'programada' ? (
+                              <>
+                                <i className="bi bi-check-circle-fill me-1"></i>Programada
+                              </>
+                            ) : s.estado === 'completada' ? (
+                              <>
+                                <i className="bi bi-mortarboard-fill me-1"></i>Completada
+                              </>
+                            ) : s.estado === 'no_asistio' ? (
+                              <>
+                                <i className="bi bi-person-x-fill me-1"></i>No asistió
+                              </>
+                            ) : (
+                              s.estado
+                            )}
                           </Badge>
                         </div>
                       </Card.Body>

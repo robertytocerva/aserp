@@ -12,12 +12,12 @@ function AdminLayout() {
   };
 
   const items = [
-    { to: '/admin', label: 'Dashboard', icon: '📊', end: true },
-    { to: '/admin/asesores', label: 'Asesores', icon: '🎓' },
-    { to: '/admin/materias', label: 'Materias y carreras', icon: '📚' },
-    { to: '/admin/solicitudes', label: 'Solicitudes', icon: '📝' },
-    { to: '/admin/bitacoras', label: 'Bitácoras', icon: '📓' },
-    { to: '/admin/reportes', label: 'Reportes', icon: '📈' },
+    { to: '/admin', label: 'Dashboard', icon: 'bi-speedometer2', end: true },
+    { to: '/admin/asesores', label: 'Asesores', icon: 'bi-mortarboard-fill' },
+    { to: '/admin/materias', label: 'Materias y carreras', icon: 'bi-book-fill' },
+    { to: '/admin/solicitudes', label: 'Solicitudes', icon: 'bi-envelope-paper-fill' },
+    { to: '/admin/bitacoras', label: 'Bitácoras', icon: 'bi-journal-text' },
+    { to: '/admin/reportes', label: 'Reportes', icon: 'bi-graph-up-arrow' },
   ];
 
   return (
@@ -67,7 +67,7 @@ function AdminLayout() {
                     padding: '0.6rem 0.8rem',
                   })}
                 >
-                  <span>{item.icon}</span>
+                  <i className={`bi ${item.icon}`}></i>
                   <span>{item.label}</span>
                 </NavLink>
               ))}
@@ -81,7 +81,7 @@ function AdminLayout() {
               size="sm"
               className="w-100 mb-2"
             >
-              ← Volver al sitio
+              <i className="bi bi-arrow-left me-1"></i> Volver al sitio
             </Button>
             <Button
               onClick={handleLogout}
@@ -89,7 +89,7 @@ function AdminLayout() {
               size="sm"
               className="w-100"
             >
-              Cerrar sesión
+              <i className="bi bi-box-arrow-right me-1"></i> Cerrar sesión
             </Button>
           </div>
         </Col>

@@ -52,8 +52,23 @@ function Programa() {
         <Container>
           <Card className="border-0 shadow-sm">
             <Card.Body className="p-4 p-md-5 text-center">
+              <div
+                className="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+                style={{
+                  width: '70px',
+                  height: '70px',
+                  backgroundColor: 'var(--azul-suave)',
+                  color: 'var(--azul-primario)',
+                  fontSize: '2rem',
+                }}
+              >
+                <i className="bi bi-bullseye"></i>
+              </div>
               <h2 className="fw-bold text-azul mb-3">Nuestro objetivo</h2>
-              <p className="lead text-suave mb-0" style={{ maxWidth: '800px', margin: '0 auto' }}>
+              <p
+                className="lead text-suave mb-0"
+                style={{ maxWidth: '800px', margin: '0 auto' }}
+              >
                 {info.objetivoGeneral}
               </p>
             </Card.Body>
@@ -149,9 +164,15 @@ function Programa() {
             <Col lg={6}>
               <Card className="border-0 shadow-sm h-100">
                 <Card.Body className="p-4">
-                  <h3 className="fw-bold text-azul mb-3">
-                    Requisitos para ser asesor par
-                  </h3>
+                  <div className="d-flex align-items-center gap-2 mb-3">
+                    <i
+                      className="bi bi-mortarboard-fill"
+                      style={{ fontSize: '1.5rem', color: 'var(--azul-primario)' }}
+                    ></i>
+                    <h3 className="fw-bold text-azul mb-0">
+                      Requisitos para ser asesor par
+                    </h3>
+                  </div>
                   <ol className="text-suave mb-0 ps-3">
                     {info.requisitos.map((r, i) => (
                       <li key={i} className="mb-2">
@@ -165,7 +186,13 @@ function Programa() {
             <Col lg={6}>
               <Card className="border-0 shadow-sm h-100">
                 <Card.Body className="p-4">
-                  <h3 className="fw-bold text-azul mb-3">Responsabilidades</h3>
+                  <div className="d-flex align-items-center gap-2 mb-3">
+                    <i
+                      className="bi bi-clipboard-check-fill"
+                      style={{ fontSize: '1.5rem', color: 'var(--azul-primario)' }}
+                    ></i>
+                    <h3 className="fw-bold text-azul mb-0">Responsabilidades</h3>
+                  </div>
                   <ul className="text-suave mb-0 ps-3">
                     {info.responsabilidades.map((r, i) => (
                       <li key={i} className="mb-2">
@@ -179,8 +206,14 @@ function Programa() {
           </Row>
 
           <div className="text-center mt-4">
-            <Button as={Link} to="/postular-asesor" size="lg" className="btn-amarillo">
-              Quiero postularme como asesor →
+            <Button
+              as={Link}
+              to="/postular-asesor"
+              size="lg"
+              className="btn-amarillo"
+            >
+              Quiero postularme como asesor
+              <i className="bi bi-arrow-right ms-2"></i>
             </Button>
           </div>
         </Container>
@@ -213,10 +246,10 @@ function Programa() {
       </section>
 
       {/* ============ CTA FINAL ============ */}
-      <section className="py-5" style={{ backgroundColor: 'var(--azul-primario)' }}>
-        <Container className="text-center text-white">
+      <section className="py-5 bg-azul-primario">
+        <Container className="text-center">
           <h2 className="fw-bold mb-3">¿Listo para comenzar?</h2>
-          <p className="lead mb-4" style={{ opacity: 0.9 }}>
+          <p className="lead mb-4">
             Únete a la comunidad de apoyo académico del ITS Uruapan.
           </p>
           <div className="d-flex justify-content-center gap-2 flex-wrap">

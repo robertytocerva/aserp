@@ -12,10 +12,10 @@ function PanelAsesorLayout() {
   };
 
   const items = [
-    { to: '/panel-asesor', label: 'Dashboard', icon: '📊', end: true },
-    { to: '/mis-horarios', label: 'Mis horarios', icon: '📅' },
-    { to: '/solicitudes-recibidas', label: 'Solicitudes recibidas', icon: '📩' },
-    { to: '/mi-agenda', label: 'Mi agenda', icon: '🗓️' },
+    { to: '/panel-asesor', label: 'Dashboard', icon: 'bi-speedometer2', end: true },
+    { to: '/mis-horarios', label: 'Mis horarios', icon: 'bi-calendar-event-fill' },
+    { to: '/solicitudes-recibidas', label: 'Solicitudes recibidas', icon: 'bi-envelope-paper-fill' },
+    { to: '/mi-agenda', label: 'Mi agenda', icon: 'bi-calendar-week-fill' },
   ];
 
   return (
@@ -33,7 +33,7 @@ function PanelAsesorLayout() {
           >
             <div className="text-center mb-3 pb-3 border-bottom">
               <div
-                className="d-inline-flex align-items-center justify-content-center rounded-circle text-white mb-2"
+                className="d-inline-flex align-items-center justify-content-center rounded-circle mb-2"
                 style={{
                   width: '50px',
                   height: '50px',
@@ -68,7 +68,7 @@ function PanelAsesorLayout() {
                     padding: '0.6rem 0.8rem',
                   })}
                 >
-                  <span>{item.icon}</span>
+                  <i className={`bi ${item.icon}`}></i>
                   <span>{item.label}</span>
                 </NavLink>
               ))}
@@ -82,7 +82,7 @@ function PanelAsesorLayout() {
               size="sm"
               className="w-100 mb-2"
             >
-              ← Volver al sitio
+              <i className="bi bi-arrow-left me-1"></i> Volver al sitio
             </Button>
             <Button
               onClick={handleLogout}
@@ -90,7 +90,7 @@ function PanelAsesorLayout() {
               size="sm"
               className="w-100"
             >
-              Cerrar sesión
+              <i className="bi bi-box-arrow-right me-1"></i> Cerrar sesión
             </Button>
           </div>
         </Col>

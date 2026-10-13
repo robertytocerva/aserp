@@ -108,3 +108,122 @@ body {
   transform: translateY(-4px);
   box-shadow: 0 8px 20px rgba(13, 71, 161, 0.15);
 }
+
+/* ============ CONTRASTE EN FONDOS AZULES ============ */
+/* Los textos sobre fondo azul primario/claro siempre van en blanco */
+.bg-azul-primario,
+.bg-azul-claro {
+  color: var(--blanco);
+}
+
+.bg-azul-primario h1,
+.bg-azul-primario h2,
+.bg-azul-primario h3,
+.bg-azul-primario h4,
+.bg-azul-primario h5,
+.bg-azul-primario h6,
+.bg-azul-primario p,
+.bg-azul-primario span,
+.bg-azul-primario small,
+.bg-azul-claro h1,
+.bg-azul-claro h2,
+.bg-azul-claro h3,
+.bg-azul-claro h4,
+.bg-azul-claro h5,
+.bg-azul-claro h6,
+.bg-azul-claro p,
+.bg-azul-claro span,
+.bg-azul-claro small {
+  color: var(--blanco);
+}
+
+/* Excepción: badges y botones amarillos sobre azul mantienen su color original */
+.bg-azul-primario .btn-amarillo,
+.bg-azul-claro .btn-amarillo,
+.bg-azul-primario .badge.btn-amarillo,
+.bg-azul-claro .badge.btn-amarillo,
+.bg-azul-primario .text-warning,
+.bg-azul-claro .text-warning {
+  color: var(--texto) !important;
+}
+
+.bg-azul-primario .text-warning,
+.bg-azul-claro .text-warning {
+  color: var(--amarillo-primario) !important;
+}
+
+/* Iconos: heredan el color del texto */
+.bi {
+  line-height: 1;
+  vertical-align: -0.125em;
+}
+
+/* ============ BADGES Y TEXTOS SOBRE FONDO AZUL ============ */
+
+/* Badges con fondo azul primario siempre deben llevar texto blanco */
+.badge.bg-primary,
+.badge.bg-azul-primario,
+.badge.bg-azul-claro,
+.badge.bg-info,
+.badge.bg-success,
+.badge.bg-danger,
+.badge.bg-secondary,
+.badge.bg-warning,
+.badge.bg-dark {
+  color: var(--blanco) !important;
+}
+
+/* Excepción: badges amarillos (btn-amarillo o bg-warning) sí usan texto oscuro */
+.badge.btn-amarillo,
+.badge.bg-warning {
+  color: var(--texto) !important;
+}
+
+/* Recuadros azules (cualquier elemento con bg-azul-primario) — texto blanco */
+.bg-azul-primario,
+.bg-azul-claro {
+  color: var(--blanco) !important;
+}
+
+/* Excepción: si tiene la clase text-warning o btn-amarillo dentro, mantener contraste */
+.bg-azul-primario .text-warning,
+.bg-azul-claro .text-warning {
+  color: var(--amarillo-primario) !important;
+}
+
+.bg-azul-primario .btn-amarillo,
+.bg-azul-claro .btn-amarillo,
+.bg-azul-primario .badge.btn-amarillo,
+.bg-azul-claro .badge.btn-amarillo {
+  color: var(--texto) !important;
+}
+
+/* ============ BADGES CON FONDO AZUL Y TEXTO BLANCO ============ */
+/* Para badges personalizados que usan estilos en línea o clases propias */
+
+.badge-contraste {
+  color: var(--blanco) !important;
+}
+
+/* ============ AJUSTE GENERAL A BADGES CON FONDOS OSCUROS ============ */
+/* Bootstrap debería calcular el contraste automáticamente, pero forzamos */
+
+.badge {
+  font-weight: 500;
+}
+
+/* ============ BADGE DE PROMEDIO ============ */
+/* Fondo azul con texto blanco y estrella amarilla */
+.badge-promedio {
+  background-color: var(--azul-primario);
+  color: var(--blanco) !important;
+  font-weight: 600;
+  padding: 0.4em 0.8em;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-promedio .bi {
+  color: var(--amarillo-primario) !important;
+}

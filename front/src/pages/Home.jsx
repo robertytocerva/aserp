@@ -28,7 +28,7 @@ function Home() {
 
   return (
     <>
-      {/* ============ HERO ============ */}
+      {/* HERO */}
       <section className="py-5" style={{ backgroundColor: 'var(--azul-suave)' }}>
         <Container>
           <Row className="align-items-center g-4">
@@ -54,7 +54,7 @@ function Home() {
               </p>
               <div className="d-flex flex-wrap gap-2">
                 <Button as={Link} to="/asesores" size="lg" className="btn-azul">
-                  🔍 Buscar asesor
+                  <i className="bi bi-search me-2"></i> Buscar asesor
                 </Button>
                 <Button as={Link} to="/registro" size="lg" className="btn-amarillo">
                   Quiero ser asesor
@@ -90,25 +90,25 @@ function Home() {
         </Container>
       </section>
 
-      {/* ============ ESTADÍSTICAS ============ */}
-      <section className="py-4" style={{ backgroundColor: 'var(--azul-primario)' }}>
+      {/* ESTADÍSTICAS */}
+      <section className="py-4 bg-azul-primario">
         <Container>
-          <Row className="text-white text-center g-3">
+          <Row className="text-center g-3">
             <Col md={4}>
               <div className="display-5 fw-bold text-warning">+50</div>
-              <div className="small" style={{ opacity: 0.9 }}>
+              <div className="small">
                 Asesorías impartidas
               </div>
             </Col>
             <Col md={4}>
               <div className="display-5 fw-bold text-warning">+30</div>
-              <div className="small" style={{ opacity: 0.9 }}>
+              <div className="small">
                 Alumnos beneficiados
               </div>
             </Col>
             <Col md={4}>
               <div className="display-5 fw-bold text-warning">100%</div>
-              <div className="small" style={{ opacity: 0.9 }}>
+              <div className="small">
                 Gratuito
               </div>
             </Col>
@@ -116,7 +116,7 @@ function Home() {
         </Container>
       </section>
 
-      {/* ============ BENEFICIOS ============ */}
+      {/* BENEFICIOS */}
       <section className="py-5">
         <Container>
           <div className="text-center mb-5">
@@ -167,7 +167,7 @@ function Home() {
         </Container>
       </section>
 
-      {/* ============ ASESORES DESTACADOS ============ */}
+      {/* ASESORES DESTACADOS */}
       <section className="py-5" style={{ backgroundColor: 'var(--blanco)' }}>
         <Container>
           <div className="text-center mb-5">
@@ -201,12 +201,12 @@ function Home() {
                     </div>
                     <Card.Body className="pt-0">
                       <h6 className="fw-bold text-azul mb-1">{a.nombreAlumno}</h6>
-                      <Badge className="btn-amarillo text-dark mb-2">
-                        ⭐ {a.promedio}
+                      <Badge className="badge-promedio mb-2">
+                        <i className="bi bi-star-fill"></i> {a.promedio}
                       </Badge>
                       {a.materias && a.materias.length > 0 && (
                         <p className="text-suave small mb-2">
-                          {a.materias.slice(0, 2).map((m) => m.nombre).join(', ')}
+                          {a.materias.slice(0, 2).map((m) => m.nombre || m.nombreMateria).join(', ')}
                           {a.materias.length > 2 && ` +${a.materias.length - 2}`}
                         </p>
                       )}
@@ -227,13 +227,13 @@ function Home() {
 
           <div className="text-center mt-4">
             <Button as={Link} to="/asesores" variant="outline-primary">
-              Ver todos los asesores →
+              Ver todos los asesores <i className="bi bi-arrow-right ms-1"></i>
             </Button>
           </div>
         </Container>
       </section>
 
-      {/* ============ CÓMO FUNCIONA ============ */}
+      {/* CÓMO FUNCIONA */}
       <section className="py-5" style={{ backgroundColor: 'var(--blanco)' }}>
         <Container>
           <div className="text-center mb-5">
@@ -270,11 +270,11 @@ function Home() {
         </Container>
       </section>
 
-      {/* ============ CTA FINAL ============ */}
-      <section className="py-5" style={{ backgroundColor: 'var(--azul-primario)' }}>
-        <Container className="text-center text-white">
+      {/* CTA FINAL */}
+      <section className="py-5 bg-azul-primario">
+        <Container className="text-center">
           <h2 className="fw-bold mb-3">¿Listo para comenzar?</h2>
-          <p className="lead mb-4" style={{ opacity: 0.9 }}>
+          <p className="lead mb-4">
             Únete al programa y forma parte de la comunidad de apoyo académico del ITS Uruapan.
           </p>
           <div className="d-flex justify-content-center gap-2 flex-wrap">

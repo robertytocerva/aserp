@@ -42,7 +42,9 @@ function PostularAsesor() {
         <Row className="justify-content-center">
           <Col md={8} lg={6}>
             <Card className="border-0 shadow-sm text-center p-4">
-              <div style={{ fontSize: '4rem' }}>🔒</div>
+              <div style={{ fontSize: '4rem', color: 'var(--azul-primario)' }}>
+                <i className="bi bi-lock-fill"></i>
+              </div>
               <h4 className="fw-bold text-azul mb-2">Inicia sesión primero</h4>
               <p className="text-suave mb-4">
                 Para postularte como asesor par necesitas iniciar sesión con tu cuenta
@@ -85,7 +87,9 @@ function PostularAsesor() {
         <Row className="justify-content-center">
           <Col md={8} lg={6}>
             <Card className="border-0 shadow-sm text-center p-4">
-              <div style={{ fontSize: '4rem' }}>🎉</div>
+              <div style={{ fontSize: '4rem', color: 'var(--azul-primario)' }}>
+                <i className="bi bi-emoji-smile"></i>
+              </div>
               <h4 className="fw-bold text-azul mb-2">¡Ya eres asesor par!</h4>
               <p className="text-suave mb-4">
                 Tienes acceso a tu panel de asesor donde puedes gestionar horarios,
@@ -108,7 +112,9 @@ function PostularAsesor() {
         <Row className="justify-content-center">
           <Col md={8} lg={6}>
             <Card className="border-0 shadow-sm text-center p-4">
-              <div style={{ fontSize: '4rem' }}>⏳</div>
+              <div style={{ fontSize: '4rem', color: 'var(--exito)' }}>
+                <i className="bi bi-check-circle-fill"></i>
+              </div>
               <h4 className="fw-bold text-azul mb-2">Postulación en revisión</h4>
               <p className="text-suave mb-3">
                 Tu solicitud para ser asesor par ya fue enviada. Un administrador la
@@ -135,7 +141,9 @@ function PostularAsesor() {
         <Row className="justify-content-center">
           <Col md={8} lg={6}>
             <Card className="border-0 shadow-sm text-center p-4">
-              <div style={{ fontSize: '4rem' }}>✅</div>
+              <div style={{ fontSize: '4rem', color: 'var(--exito)' }}>
+                <i className="bi bi-check-circle-fill"></i>
+              </div>
               <h4 className="fw-bold text-azul mb-2">¡Postulación enviada!</h4>
               <p className="text-suave mb-4">
                 Tu solicitud ha sido registrada. Un administrador la revisará y
@@ -336,14 +344,17 @@ function PostularAsesor() {
                 </h5>
                 <div className="d-flex flex-column gap-3">
                   {[
-                    { icon: '🏆', txt: 'Reconocimiento institucional como asesor par' },
-                    { icon: '📜', txt: 'Constancia con valor curricular al finalizar' },
-                    { icon: '💪', txt: 'Desarrollo de habilidades docentes y de comunicación' },
-                    { icon: '📚', txt: 'Refuerzo de tus propios conocimientos' },
-                    { icon: '🤝', txt: 'Formar parte de la comunidad de apoyo académico' },
+                    { icon: 'bi-trophy-fill', txt: 'Reconocimiento institucional como asesor par' },
+                    { icon: 'bi-file-text-fill', txt: 'Constancia con valor curricular al finalizar' },
+                    { icon: 'bi-people-fill', txt: 'Desarrollo de habilidades docentes y de comunicación' },
+                    { icon: 'bi-book-fill', txt: 'Refuerzo de tus propios conocimientos' },
+                    { icon: 'bi-hand-thumbs-up-fill', txt: 'Formar parte de la comunidad de apoyo académico' },
                   ].map((b, i) => (
                     <div key={i} className="d-flex align-items-start gap-3">
-                      <span style={{ fontSize: '1.5rem' }}>{b.icon}</span>
+                      <i
+                        className={`bi ${b.icon}`}
+                        style={{ fontSize: '1.5rem', color: 'var(--azul-primario)' }}
+                      ></i>
                       <span className="text-suave small pt-1">{b.txt}</span>
                     </div>
                   ))}

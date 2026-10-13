@@ -12,10 +12,7 @@ import {
   Spinner,
 } from 'react-bootstrap';
 import { horariosApi } from '../../api/horariosApi';
-import {
-  DIAS_SEMANA,
-  MODALIDAD_INFO,
-} from '../../mocks/asesoresMock';
+import { DIAS_SEMANA, MODALIDAD_INFO } from '../../mocks/asesoresMock';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
 const FORM_INICIAL = {
@@ -32,16 +29,13 @@ function MisHorarios() {
   const [error, setError] = useState('');
   const [exito, setExito] = useState('');
 
-  // Modal de crear/editar
   const [modal, setModal] = useState({ show: false, editando: null });
   const [form, setForm] = useState(FORM_INICIAL);
   const [errores, setErrores] = useState({});
   const [guardando, setGuardando] = useState(false);
 
-  // Modal de confirmación de eliminación
   const [modalEliminar, setModalEliminar] = useState({ show: false, horario: null });
 
-  // ============ CARGA ============
   const cargar = async () => {
     setCargando(true);
     setError('');
@@ -59,7 +53,6 @@ function MisHorarios() {
     cargar();
   }, []);
 
-  // ============ MODAL CREAR/EDITAR ============
   const abrirCrear = () => {
     setForm(FORM_INICIAL);
     setErrores({});
@@ -120,10 +113,10 @@ function MisHorarios() {
 
       if (modal.editando) {
         await horariosApi.actualizar(modal.editando.idHorario, payload);
-        setExito('✅ Horario actualizado correctamente.');
+        setExito('Horario actualizado correctamente.');
       } else {
         await horariosApi.crear(payload);
-        setExito('✅ Horario creado correctamente.');
+        setExito('Horario creado correctamente.');
       }
       cerrarModal();
       cargar();
@@ -138,7 +131,6 @@ function MisHorarios() {
     }
   };
 
-  // ============ ELIMINAR ============
   const confirmarEliminar = (horario) => {
     setModalEliminar({ show: true, horario });
   };
@@ -149,7 +141,7 @@ function MisHorarios() {
 
     try {
       await horariosApi.eliminar(h.idHorario);
-      setExito('🗑️ Horario eliminado correctamente.');
+      setExito('Horario eliminado correctamente.');
       setModalEliminar({ show: false, horario: null });
       cargar();
     } catch (err) {
@@ -158,7 +150,6 @@ function MisHorarios() {
     }
   };
 
-  // ============ AGRUPAR POR DÍA ============
   const horariosPorDia = horarios.reduce((acc, h) => {
     const dia = h.diaSemana;
     if (!acc[dia]) acc[dia] = [];
@@ -166,7 +157,6 @@ function MisHorarios() {
     return acc;
   }, {});
 
-  // ============ RENDER ============
   return (
     <>
       <div className="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
@@ -177,7 +167,7 @@ function MisHorarios() {
           </p>
         </div>
         <Button className="btn-amarillo fw-semibold" onClick={abrirCrear}>
-          ➕ Nuevo horario
+          <i className="bi bi-plus-circle me-1"></i> Nuevo horario
         </Button>
       </div>
 
@@ -196,7 +186,14 @@ function MisHorarios() {
         <LoadingSpinner mensaje="Cargando tus horarios..." />
       ) : horarios.length === 0 ? (
         <Card className="border-0 shadow-sm text-center p-5">
-          <div style={{ fontSize: '3rem' }}>📅</div>
+          <div
+            style={{
+              fontSize: '3rem',
+              color: 'var(--azul-primario)',
+            }}
+          >
+            <i className="bi bi-calendar-event"></i>
+          </div>
           <h5 className="fw-bold text-azul mb-2">Aún no tienes horarios</h5>
           <p className="text-suave mb-4">
             Publica tu primer bloque de disponibilidad para que los alumnos puedan
@@ -204,13 +201,12 @@ function MisHorarios() {
           </p>
           <div>
             <Button className="btn-azul" onClick={abrirCrear}>
-              ➕ Crear mi primer horario
+              <i className="bi bi-plus-circle me-1"></i> Crear mi primer horario
             </Button>
           </div>
         </Card>
       ) : (
         <>
-          {/* Vista de tabla completa */}
           <Card className="border-0 shadow-sm mb-4">
             <div className="table-responsive">
               <Table hover className="mb-0 align-middle">
@@ -242,7 +238,8 @@ function MisHorarios() {
                           </td>
                           <td>
                             <Badge bg={info.color} className="fw-normal">
-                              {info.icon} {info.label}
+                              <i className={`bi ${info.icon} me-1`}></i>
+                              {info.label}
                             </Badge>
                           </td>
                           <td className="small text-suave">
@@ -264,7 +261,7 @@ function MisHorarios() {
                                 disabled={!h.activo}
                                 title="Editar"
                               >
-                                ✏️
+                                <i className="bi bi-pencil"></i>
                               </Button>
                               <Button
                                 size="sm"
@@ -273,7 +270,7 @@ function MisHorarios() {
                                 disabled={!h.activo}
                                 title="Eliminar"
                               >
-                                🗑️
+                                <i className="bi bi-trash"></i>
                               </Button>
                             </div>
                           </td>
@@ -285,7 +282,6 @@ function MisHorarios() {
             </div>
           </Card>
 
-          {/* Vista semanal */}
           <Card className="border-0 shadow-sm">
             <Card.Body>
               <h5 className="fw-bold text-azul mb-3">Vista semanal</h5>
@@ -317,8 +313,12 @@ function MisHorarios() {
                                 {h.horaInicio} - {h.horaFin}
                               </div>
                               {h.lugar && (
-                                <div className="text-suave" style={{ fontSize: '0.75rem' }}>
-                                  📍 {h.lugar}
+                                <div
+                                  className="text-suave"
+                                  style={{ fontSize: '0.75rem' }}
+                                >
+                                  <i className="bi bi-geo-alt-fill me-1"></i>
+                                  {h.lugar}
                                 </div>
                               )}
                             </div>
@@ -335,11 +335,19 @@ function MisHorarios() {
         </>
       )}
 
-      {/* ============ MODAL CREAR/EDITAR ============ */}
+      {/* Modal crear/editar */}
       <Modal show={modal.show} onHide={cerrarModal} centered>
         <Modal.Header closeButton>
           <Modal.Title className="fw-bold text-azul">
-            {modal.editando ? '✏️ Editar horario' : '➕ Nuevo horario'}
+            {modal.editando ? (
+              <>
+                <i className="bi bi-pencil me-2"></i>Editar horario
+              </>
+            ) : (
+              <>
+                <i className="bi bi-plus-circle me-2"></i>Nuevo horario
+              </>
+            )}
           </Modal.Title>
         </Modal.Header>
         <Form onSubmit={guardar}>
@@ -404,9 +412,9 @@ function MisHorarios() {
                 onChange={onChange}
                 isInvalid={!!errores.modalidad}
               >
-                <option value="presencial">🏫 Presencial</option>
-                <option value="virtual">💻 Virtual</option>
-                <option value="hibrida">🔄 Híbrida</option>
+                <option value="presencial">Presencial</option>
+                <option value="virtual">Virtual</option>
+                <option value="hibrida">Híbrida</option>
               </Form.Select>
               <Form.Control.Feedback type="invalid">
                 {errores.modalidad}
@@ -449,7 +457,7 @@ function MisHorarios() {
         </Form>
       </Modal>
 
-      {/* ============ MODAL ELIMINAR ============ */}
+      {/* Modal eliminar */}
       <Modal
         show={modalEliminar.show}
         onHide={() => setModalEliminar({ show: false, horario: null })}
@@ -457,13 +465,16 @@ function MisHorarios() {
       >
         <Modal.Header closeButton>
           <Modal.Title className="fw-bold text-danger">
-            🗑️ Confirmar eliminación
+            <i className="bi bi-trash me-2"></i>Confirmar eliminación
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           ¿Seguro que quieres eliminar este horario?
           {modalEliminar.horario && (
-            <div className="mt-3 p-3 rounded" style={{ backgroundColor: 'var(--fondo)' }}>
+            <div
+              className="mt-3 p-3 rounded"
+              style={{ backgroundColor: 'var(--fondo)' }}
+            >
               <div className="fw-semibold">
                 {DIAS_SEMANA[modalEliminar.horario.diaSemana]}
               </div>
@@ -484,7 +495,7 @@ function MisHorarios() {
             Cancelar
           </Button>
           <Button variant="danger" onClick={eliminar}>
-            Sí, eliminar
+            <i className="bi bi-trash me-1"></i> Sí, eliminar
           </Button>
         </Modal.Footer>
       </Modal>

@@ -111,7 +111,9 @@ function Asesores() {
         <Row className="g-3 mb-4">
           <Col md={7}>
             <InputGroup>
-              <InputGroup.Text className="bg-white border-end-0">🔍</InputGroup.Text>
+              <InputGroup.Text className="bg-white border-end-0">
+                <i className="bi bi-search"></i>
+                </InputGroup.Text>
               <Form.Control
                 placeholder="Buscar por nombre o matrícula..."
                 value={busqueda}
@@ -161,7 +163,9 @@ function Asesores() {
           <Alert variant="danger">{error}</Alert>
         ) : asesoresFiltrados.length === 0 ? (
           <Alert variant="info" className="text-center">
-            <div style={{ fontSize: '3rem' }}>🔎</div>
+            <div style={{ fontSize: '3rem', color: 'var(--azul-primario)' }}>
+              <i className="bi bi-search"></i>
+            </div>
             <h5 className="fw-bold text-azul">No se encontraron asesores</h5>
             <p className="text-suave mb-0">
               {asesores.length === 0
@@ -182,7 +186,7 @@ function Asesores() {
         {USE_MOCKS && !cargando && (
           <div className="text-center mt-5">
             <Badge bg="warning" text="dark" className="px-3 py-2">
-              ⚠️ Mostrando datos de prueba — pendiente conectar al backend real
+              <i className="bi bi-exclamation-triangle-fill me-1"></i> Mostrando datos de prueba — pendiente conectar al backend real
             </Badge>
           </div>
         )}
