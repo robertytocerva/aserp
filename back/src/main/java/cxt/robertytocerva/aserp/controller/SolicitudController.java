@@ -43,6 +43,12 @@ public class SolicitudController {
         return ResponseEntity.ok(solicitudService.aceptar(id, idAlumno(jwt)));
     }
 
+    @PatchMapping("/{id}/completar")
+    public ResponseEntity<SolicitudDTO.Response> completar(@AuthenticationPrincipal Jwt jwt,
+                                                           @PathVariable Integer id) {
+        return ResponseEntity.ok(solicitudService.completar(id, idAlumno(jwt)));
+    }
+
     @PatchMapping("/{id}/rechazar")
     public ResponseEntity<SolicitudDTO.Response> rechazar(@AuthenticationPrincipal Jwt jwt,
                                                           @PathVariable Integer id) {

@@ -23,6 +23,7 @@ public class SolicitudService {
     public static final String ESTADO_SOLICITADA = "solicitada";
     public static final String ESTADO_PROGRAMADA = "programada";
     public static final String ESTADO_RECHAZADA = "rechazada";
+    public static final String ESTADO_COMPLETADA = "completada";
 
     private final AsesoriaRepository asesoriaRepository;
     private final HorarioAsesorRepository horarioAsesorRepository;
@@ -123,6 +124,23 @@ public class SolicitudService {
             throw new BadRequestException("Solo se pueden rechazar solicitudes en estado solicitada");
         }
         asesoria.setEstado(ESTADO_RECHAZADA);
+        asesoria = asesoriaRepository.save(asesoria);
+        return toResponse(asesoria);
+    }
+
+    @Transactional
+    public SolicitudDTO.Response completar(Integer idAsesoria, Integer idAlumno) {
+        Asesoria asesoria = buscarPropia(idAsesoria, idAlumno);
+        if (!ESTADO_PROGRAMADA.equals(asesoria.getEstado())) {
+            throw new BadRequestException("Solo se pueden completar sesiones programadas");
+        }
+        LocalDate hoy = LocalDate.now();
+        boolean terminada = asesoria.getFecha().isBefore(hoy)
+                || (asesoria.getFecha().isEqual(hoy) && !LocalTime.now().isBefore(asesoria.getHoraFin()));
+        if (!terminada) {
+            throw new BadRequestException("La sesion aun no ha terminado");
+        }
+        asesoria.setEstado(ESTADO_COMPLETADA);
         asesoria = asesoriaRepository.save(asesoria);
         return toResponse(asesoria);
     }

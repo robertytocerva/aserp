@@ -11,3 +11,13 @@ services:
         sync: false
       - key: SPRING_JPA_SHOW_SQL
         value: "false"
+      - key: MAIL_HOST
+        sync: false
+      - key: MAIL_PORT
+        sync: false
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_FROM
+        sync: false

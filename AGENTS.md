@@ -29,8 +29,8 @@ There is no lint/format/typecheck tooling and no CI — compile + tests are the 
 ## Database / Flyway
 
 - Schema is owned entirely by Flyway: `spring.jpa.hibernate.ddl-auto=validate`. Never hand-edit the DB or add `ddl-auto=update`.
-- Migrations are applied in order and must never be edited after applying. `V001__create_asesorias_schema.sql` (8 tables), `V002__usuarios_y_validacion_asesores.sql` (`usuarios` + `asesores.validado`) and `V003__estados_solicitud_asesoria.sql` (`asesorias.estado` CHECK ampliado a `solicitada`/`rechazada`) are already applied. Add `V00N__descripcion.sql` for any schema change, then adjust entities so `validate` passes.
-- The schema is still slightly ahead of the code: table `bitacoras` exists in the DB but has no entity/service/controller yet.
+- Migrations are applied in order and must never be edited after applying. `V001__create_asesorias_schema.sql` (8 tables), `V002__usuarios_y_validacion_asesores.sql` (`usuarios` + `asesores.validado`), `V003__estados_solicitud_asesoria.sql` (`asesorias.estado` CHECK ampliado a `solicitada`/`rechazada`) and `V004__bitacoras.sql` (snapshot de la sesion, imagen BYTEA, estado de correo) are already applied. Add `V00N__descripcion.sql` for any schema change, then adjust entities so `validate` passes.
+- The schema is still slightly ahead of the code: table `asesor_materia` is mapped, but `bitacoras` columns `calificacion_alumno`/`comentario_alumno` are not mapped (no endpoint uses them yet).
 - Columns are snake_case; entity fields camelCase with explicit `@Column(name = "snake_case")`.
 - Entity boolean defaults are applied in `@PrePersist` (e.g. `activo = true`), **not** via field initializers — Lombok `@Builder` silently drops them.
 - `asesorias.estado` and `modalidad` fields are `String` (V001/V003 CHECKs use lowercase values; a `@Enumerated(EnumType.STRING)` would persist uppercase names and violate them).
@@ -61,6 +61,16 @@ There is no lint/format/typecheck tooling and no CI — compile + tests are the 
 - Creating a solicitud copies `hora_inicio/hora_fin/modalidad/lugar` from the horario — editing the horario later must not move existing sessions.
 - One active (`solicitada`/`programada`) asesoría per asesor+fecha+time-overlap: enforced on insert via `AsesoriaRepository.existeTraslape` and it filters slots out of `GET /api/asesores/{id}/horarios/disponibles`. Test both sides (slot hidden from other alumnos, reappears after `rechazar`).
 - The asesor cannot request their own horario; `fecha` must match the horario's `dia_semana` and be today or later.
+
+## Bitacoras y correo (V004)
+
+- `Bitacora` (tabla `bitacoras`) is created only by `BitacoraService.crear`, from a sesion in estado `completada` owned by the asesor. One per sesion (`id_asesoria` UNIQUE, checked before insert).
+- The sesion data (fecha, horas, matricula, nombres, materia, carrera) is copied into the bitacora at creation; never re-read from the sesion for display.
+- The sesion reaches `completada` only through `SolicitudService.completar` (programada and already finished: fecha before today, or today after `hora_fin`).
+- Imagen de evidencia: JPG/PNG validated by binary signature (`ImagenEvidenciaValidator`), max 2 MB, stored as `BYTEA`. Oversized uploads are mapped to 400 in `GlobalExceptionHandler`.
+- The email is sent with `@TransactionalEventListener(AFTER_COMMIT)` in `BitacoraMailService` (own transaction, `REQUIRES_NEW`). A failed SMTP never rolls back the bitacora; the outcome is stored in `correo_enviado` / `correo_error`.
+- SMTP settings come from env vars (`MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM`, `MAIL_SMTP_AUTH`, `MAIL_STARTTLS`). Defaults point to Mailtrap (`sandbox.smtp.mailtrap.io:2525`). Local tests can use Mailpit with `MAIL_HOST=localhost`, `MAIL_PORT=1025`, `MAIL_SMTP_AUTH=false`, `MAIL_STARTTLS=false`.
+- Verifying completion in tests requires a sesion whose fecha is already past; the API forbids creating past sesiones, so tests adjust `asesorias.fecha` directly and restore it.
 
 ## Materias por asesor (`asesor_materia`)
 
