@@ -150,7 +150,9 @@ public class BitacoraPdfService {
             celda.setBorderColorTop(BitacoraDiseno.BORDE_BC);
             banda.addCell(celda);
             try {
-                banda.writeSelectedRows(0, -1, doc.left(), doc.bottom() - 8f, writer.getDirectContent());
+                // writeSelectedRows exige el ancho absoluto fijado, si no lanza IllegalStateException
+                banda.setTotalWidth(doc.right() - doc.left());
+                banda.writeSelectedRows(0, -1, doc.left(), doc.bottom() - 2f, writer.getDirectContent());
             } catch (Exception ignorada) {
                 // el pie es decorativo: su fallo no debe impedir el PDF
             }
@@ -160,7 +162,7 @@ public class BitacoraPdfService {
                     Element.ALIGN_CENTER,
                     new Phrase("Pagina " + writer.getPageNumber(), fuente),
                     centro,
-                    doc.bottom() - 22f,
+                    doc.bottom() - 36f,
                     0);
         }
     }
