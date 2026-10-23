@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
-import org.springframework.web.util.HtmlUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,83 +93,36 @@ public class BitacoraMailService {
                 ? "Estimado/a asesor/a " + esc(b.getNombreAsesor()) + ",<br>Le compartimos la bitacora de la sesion de tutoria que usted registro."
                 : "Estimado/a alumno/a " + esc(b.getNombreAlumno()) + ",<br>Le compartimos la bitacora de la sesion de tutoria que tuvo con su asesor.";
 
-        StringBuilder html = new StringBuilder();
-        html.append("<div style=\"background-color:").append(BitacoraDiseno.CLARO)
-            .append(";padding:24px 12px;font-family:Arial,Helvetica,sans-serif;\">");
-        html.append("<table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"max-width:640px;margin:0 auto;background-color:")
-            .append(BitacoraDiseno.BLANCO).append(";border-radius:6px;overflow:hidden;border:1px solid")
-            .append(BitacoraDiseno.BORDE).append(";\">");
-
-        // encabezado institucional
-        html.append("<tr><td style=\"background-color:").append(BitacoraDiseno.PRIMARIO)
-            .append(";padding:28px 32px;text-align:center;\">")
-            .append("<div style=\"font-size:12px;letter-spacing:1px;color:").append(BitacoraDiseno.TEXTO_CLARO)
-            .append(";text-transform:uppercase;\">").append(BitacoraDiseno.INSTITUTO).append("</div>")
-            .append("<div style=\"font-size:24px;font-weight:bold;color:").append(BitacoraDiseno.BLANCO)
-            .append(";margin-top:8px;\">Bitacora de tutoria</div>")
-            .append("</td></tr>");
-
-        // barra de acento
-        html.append("<tr><td style=\"height:4px;background-color:").append(BitacoraDiseno.ACCENTO)
-            .append(";font-size:0;line-height:0;\">&nbsp;</td></tr>");
-
-        // cuerpo
-        html.append("<tr><td style=\"padding:28px 32px;font-size:14px;line-height:1.5;color:")
-            .append(BitacoraDiseno.TEXTO).append(";\">");
+        StringBuilder html = CorreoInstitucional.abrir("Bitacora de tutoria");
         html.append("<p style=\"margin:0 0 20px 0;\">").append(saludo).append("</p>");
 
-        // tabla de datos
-        html.append("<table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"border:1px solid")
-            .append(BitacoraDiseno.BORDE).append(";border-collapse:collapse;\">");
-        fila(html, "Fecha", b.getFechaSesion().toString());
-        fila(html, "Horario", b.getHoraInicio() + " - " + b.getHoraFin());
-        fila(html, "No. de control", b.getMatriculaAlumno());
-        fila(html, "Estudiante", b.getNombreAlumno());
-        fila(html, "Carrera", b.getNombreCarrera());
-        fila(html, "Asesor", b.getNombreAsesor());
-        fila(html, "Materia", b.getNombreMateria());
-        html.append("</table>");
+        CorreoInstitucional.abrirTabla(html);
+        CorreoInstitucional.fila(html, "Fecha", b.getFechaSesion().toString());
+        CorreoInstitucional.fila(html, "Horario", b.getHoraInicio() + " - " + b.getHoraFin());
+        CorreoInstitucional.fila(html, "No. de control", b.getMatriculaAlumno());
+        CorreoInstitucional.fila(html, "Estudiante", b.getNombreAlumno());
+        CorreoInstitucional.fila(html, "Carrera", b.getNombreCarrera());
+        CorreoInstitucional.fila(html, "Asesor", b.getNombreAsesor());
+        CorreoInstitucional.fila(html, "Materia", b.getNombreMateria());
+        CorreoInstitucional.cerrarTabla(html);
 
-        bloque(html, "Tema tratado", b.getTemasTratados());
+        CorreoInstitucional.bloque(html, "Tema tratado", b.getTemasTratados());
         if (b.getTareasAsignadas() != null) {
-            bloque(html, "Tareas asignadas", b.getTareasAsignadas());
+            CorreoInstitucional.bloque(html, "Tareas asignadas", b.getTareasAsignadas());
         }
         if (b.getObservaciones() != null) {
-            bloque(html, "Observaciones", b.getObservaciones());
+            CorreoInstitucional.bloque(html, "Observaciones", b.getObservaciones());
         }
         if (b.getImagenEvidencia() != null) {
             html.append("<p style=\"margin:16px 0 0 0;font-size:13px;color:").append(BitacoraDiseno.GRIS_PIE)
                 .append(";\">La evidencia fotografica se incluye en el PDF adjunto.</p>");
         }
-        html.append("</td></tr>");
 
-        // pie
-        html.append("<tr><td style=\"background-color:").append(BitacoraDiseno.CLARO)
-            .append(";border-top:1px solid").append(BitacoraDiseno.BORDE)
-            .append(";padding:16px 32px;font-size:12px;color:").append(BitacoraDiseno.GRIS_PIE)
-            .append(";text-align:center;\">Este mensaje fue generado automaticamente por ASERP.<br>No responda a este correo.</td></tr>");
-
-        html.append("</table></div>");
+        CorreoInstitucional.cerrar(html);
         return html.toString();
     }
 
     private static String esc(String texto) {
-        return HtmlUtils.htmlEscape(texto == null ? "" : texto);
-    }
-
-    private static void fila(StringBuilder html, String etiqueta, String valor) {
-        html.append("<tr><td style=\"padding:10px 14px;border-bottom:1px solid").append(BitacoraDiseno.BORDE)
-            .append(";background-color:").append(BitacoraDiseno.CLARO)
-            .append(";font-weight:bold;color:").append(BitacoraDiseno.PRIMARIO)
-            .append(";width:180px;\">").append(esc(etiqueta)).append("</td>")
-            .append("<td style=\"padding:10px 14px;border-bottom:1px solid").append(BitacoraDiseno.BORDE)
-            .append(";color:").append(BitacoraDiseno.TEXTO).append(";\">").append(esc(valor)).append("</td></tr>");
-    }
-
-    private static void bloque(StringBuilder html, String titulo, String texto) {
-        html.append("<p style=\"margin:20px 0 4px 0;font-size:14px;font-weight:bold;color:")
-            .append(BitacoraDiseno.PRIMARIO).append(";\">").append(esc(titulo)).append("</p>");
-        html.append("<p style=\"margin:0;font-size:14px;line-height:1.5;color:")
-            .append(BitacoraDiseno.TEXTO).append(";\">").append(esc(texto).replace("\n", "<br>")).append("</p>");
+        return CorreoInstitucional.esc(texto);
     }
 }

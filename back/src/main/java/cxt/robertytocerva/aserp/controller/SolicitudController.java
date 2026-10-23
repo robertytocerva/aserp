@@ -51,8 +51,10 @@ public class SolicitudController {
 
     @PatchMapping("/{id}/rechazar")
     public ResponseEntity<SolicitudDTO.Response> rechazar(@AuthenticationPrincipal Jwt jwt,
-                                                          @PathVariable Integer id) {
-        return ResponseEntity.ok(solicitudService.rechazar(id, idAlumno(jwt)));
+                                                          @PathVariable Integer id,
+                                                          @Valid @RequestBody(required = false) SolicitudDTO.RechazarRequest request) {
+        String motivo = request == null ? null : request.motivo();
+        return ResponseEntity.ok(solicitudService.rechazar(id, idAlumno(jwt), motivo));
     }
 
     private Integer idAlumno(Jwt jwt) {

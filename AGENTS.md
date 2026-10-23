@@ -29,7 +29,7 @@ There is no lint/format/typecheck tooling and no CI — compile + tests are the 
 ## Database / Flyway
 
 - Schema is owned entirely by Flyway: `spring.jpa.hibernate.ddl-auto=validate`. Never hand-edit the DB or add `ddl-auto=update`.
-- Migrations are applied in order and must never be edited after applying. `V001__create_asesorias_schema.sql` (8 tables), `V002__usuarios_y_validacion_asesores.sql` (`usuarios` + `asesores.validado`), `V003__estados_solicitud_asesoria.sql` (`asesorias.estado` CHECK ampliado a `solicitada`/`rechazada`) and `V004__bitacoras.sql` (snapshot de la sesion, imagen BYTEA, estado de correo) are already applied. Add `V00N__descripcion.sql` for any schema change, then adjust entities so `validate` passes.
+- Migrations are applied in order and must never be edited after applying. `V001__create_asesorias_schema.sql` (8 tables), `V002__usuarios_y_validacion_asesores.sql` (`usuarios` + `asesores.validado`), `V003__estados_solicitud_asesoria.sql` (`asesorias.estado` CHECK ampliado a `solicitada`/`rechazada`), `V004__bitacoras.sql` (snapshot de la sesion, imagen BYTEA, estado de correo) and `V005__motivo_rechazo.sql` (`asesorias.motivo_rechazo`, opcional) are already applied. Add `V00N__descripcion.sql` for any schema change, then adjust entities so `validate` passes.
 - The schema is still slightly ahead of the code: table `asesor_materia` is mapped, but `bitacoras` columns `calificacion_alumno`/`comentario_alumno` are not mapped (no endpoint uses them yet).
 - Columns are snake_case; entity fields camelCase with explicit `@Column(name = "snake_case")`.
 - Entity boolean defaults are applied in `@PrePersist` (e.g. `activo = true`), **not** via field initializers — Lombok `@Builder` silently drops them.
@@ -61,6 +61,9 @@ There is no lint/format/typecheck tooling and no CI — compile + tests are the 
 - Creating a solicitud copies `hora_inicio/hora_fin/modalidad/lugar` from the horario — editing the horario later must not move existing sessions.
 - One active (`solicitada`/`programada`) asesoría per asesor+fecha+time-overlap: enforced on insert via `AsesoriaRepository.existeTraslape` and it filters slots out of `GET /api/asesores/{id}/horarios/disponibles`. Test both sides (slot hidden from other alumnos, reappears after `rechazar`).
 - The asesor cannot request their own horario; `fecha` must match the horario's `dia_semana` and be today or later.
+- A solicitud lifecycle change triggers an email: `SolicitudService` publishes `SolicitudNotificadaEvent` (enum `CREADA` → asesor, `ACEPTADA`/`RECHAZADA` → alumno) after each `save`; `SolicitudMailService` listens with `@TransactionalEventListener(AFTER_COMMIT)` and `REQUIRES_NEW`. SMTP failure never rolls back the business change — it retries once and only logs (`log.error`); there are no DB status columns for these notifications (unlike bitacoras).
+- `PATCH .../rechazar` takes an optional `RechazarRequest` body: `{motivo?}` (max 500 chars) stored in `asesorias.motivo_rechazo` (V005) and quoted in the rejection email. Body may be omitted entirely (`@RequestBody(required = false)`).
+- All notification/template HTML is inline-styled (email clients strip `<style>` blocks) and built with the shared `CorreoInstitucional` + `BitacoraDiseno` palette — new emails should reuse both.
 
 ## Bitacoras y correo (V004)
 

@@ -16,6 +16,11 @@ public class SolicitudDTO {
             Integer idMateria
     ) {}
 
+    public record RechazarRequest(
+            @Size(max = 500, message = "El motivo no debe exceder 500 caracteres")
+            String motivo
+    ) {}
+
     public record Response(
             Integer idAsesoria,
             Integer idHorario,
@@ -31,6 +36,7 @@ public class SolicitudDTO {
             String horaFin,
             String modalidad,
             String lugar,
-            String estado
+            String estado,
+            String motivoRechazo
     ) {}
 }

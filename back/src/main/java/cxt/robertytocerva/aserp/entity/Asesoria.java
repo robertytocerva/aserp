@@ -55,6 +55,9 @@ public class Asesoria {
     @Column(nullable = false, length = 20)
     private String estado;
 
+    @Column(name = "motivo_rechazo", columnDefinition = "TEXT")
+    private String motivoRechazo;
+
     @Column(name = "creado_en", nullable = false, updatable = false)
     private LocalDateTime creadoEn;
 

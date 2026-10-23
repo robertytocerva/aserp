@@ -1321,14 +1321,45 @@ Authorization: Bearer <token-asesor>
 
 ### Rechazar solicitud
 
-Requiere token del asesor dueño. Cambia `solicitada` → `rechazada`. El slot vuelve a estar disponible para reserva.
+Requiere token del asesor dueño. Cambia `solicitada` → `rechazada`. El slot vuelve a estar disponible para reserva. El body es opcional y puede incluir un `motivo` (max. 500 caracteres) que el alumno vera en su correo de notificacion.
 
 ```
 PATCH /api/solicitudes/1/rechazar
+Content-Type: application/json
 Authorization: Bearer <token-asesor>
 ```
 
-**Response 200:** Solicitud con `estado: "rechazada"`.
+**Body (opcional):**
+```json
+{
+  "motivo": "Tengo un examen ese dia, no puedo atender"
+}
+```
+
+Se puede enviar sin body para rechazar sin motivo.
+
+**Response 200:**
+```json
+{
+  "idAsesoria": 1,
+  "estado": "rechazada",
+  "motivoRechazo": "Tengo un examen ese dia, no puedo atender"
+}
+```
+
+(Sin motivo, `"motivoRechazo": null`.)
+
+**Response 400 (motivo demasiado largo):**
+```json
+{
+  "timestamp": "2026-09-30T20:00:00",
+  "status": 400,
+  "error": "Validation Error",
+  "errors": {
+    "motivo": "El motivo no debe exceder 500 caracteres"
+  }
+}
+```
 
 **Response 400 (no esta en estado solicitada):**
 ```json
@@ -1370,6 +1401,24 @@ Authorization: Bearer <token-asesor>
   "message": "Solo se pueden completar sesiones programadas"
 }
 ```
+
+---
+
+## Notificaciones por correo de solicitudes
+
+Cada cambio en el ciclo de vida de una solicitud dispara un correo automatico (HTML con el estilo institucional de ASERP, con banda azul y pie). Los correos se envian **despues** de guardar el cambio: si el servidor SMTP falla, la operacion igual se completa y el fallo queda en los logs del servidor (no se revierte nada).
+
+| Evento | Quien lo provoca | Destinatario | Asunto |
+|---|---|---|---|
+| Solicitud creada | Alumno envia solicitud | **Asesor** | `Nueva solicitud de tutoria: {materia} ({fecha})` |
+| Solicitud aceptada | Asesor acepta | **Alumno** | `Sesion de tutoria confirmada: {materia} ({fecha})` |
+| Solicitud rechazada | Asesor rechaza | **Alumno** | `Solicitud de tutoria rechazada: {materia} ({fecha})` |
+
+Contenido de cada correo:
+
+- **Solicitud creada** (al asesor): saludo personalizado, tabla con fecha, horario, materia, modalidad/lugar y solicitante, y la llamada a accion "Ingrese a la plataforma para **aceptar o rechazar** esta solicitud".
+- **Sesión aceptada** (al alumno): tabla con los datos de la sesion y la llamada "Puede consultarla en **Mis solicitudes**".
+- **Solicitud rechazada** (al alumno): tabla con los datos, el bloque **Motivo del rechazo** solo si el asesor indico motivo, y la nota "El horario vuelve a estar disponible para reserva".
 
 ---
 

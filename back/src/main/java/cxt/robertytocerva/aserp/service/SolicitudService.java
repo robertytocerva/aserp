@@ -9,6 +9,7 @@ import cxt.robertytocerva.aserp.repository.AsesoriaRepository;
 import cxt.robertytocerva.aserp.repository.HorarioAsesorRepository;
 import cxt.robertytocerva.aserp.repository.MateriaRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +31,7 @@ public class SolicitudService {
     private final AlumnoRepository alumnoRepository;
     private final MateriaRepository materiaRepository;
     private final AsesorService asesorService;
+    private final ApplicationEventPublisher eventos;
 
     @Transactional
     public SolicitudDTO.Response solicitar(Integer idAlumno, SolicitudDTO.SolicitudRequest request) {
@@ -78,6 +80,7 @@ public class SolicitudService {
                 .build();
 
         asesoria = asesoriaRepository.save(asesoria);
+        eventos.publishEvent(new SolicitudNotificadaEvent(asesoria.getIdAsesoria(), SolicitudNotificadaEvent.Tipo.CREADA));
         return toResponse(asesoria);
     }
 
@@ -114,17 +117,20 @@ public class SolicitudService {
         }
         asesoria.setEstado(ESTADO_PROGRAMADA);
         asesoria = asesoriaRepository.save(asesoria);
+        eventos.publishEvent(new SolicitudNotificadaEvent(asesoria.getIdAsesoria(), SolicitudNotificadaEvent.Tipo.ACEPTADA));
         return toResponse(asesoria);
     }
 
     @Transactional
-    public SolicitudDTO.Response rechazar(Integer idAsesoria, Integer idAlumno) {
+    public SolicitudDTO.Response rechazar(Integer idAsesoria, Integer idAlumno, String motivo) {
         Asesoria asesoria = buscarPropia(idAsesoria, idAlumno);
         if (!ESTADO_SOLICITADA.equals(asesoria.getEstado())) {
             throw new BadRequestException("Solo se pueden rechazar solicitudes en estado solicitada");
         }
         asesoria.setEstado(ESTADO_RECHAZADA);
+        asesoria.setMotivoRechazo(motivo == null || motivo.isBlank() ? null : motivo.trim());
         asesoria = asesoriaRepository.save(asesoria);
+        eventos.publishEvent(new SolicitudNotificadaEvent(asesoria.getIdAsesoria(), SolicitudNotificadaEvent.Tipo.RECHAZADA));
         return toResponse(asesoria);
     }
 
@@ -187,7 +193,8 @@ public class SolicitudService {
                 HorarioAsesorService.fmtHora(a.getHoraFin()),
                 a.getModalidad(),
                 a.getLugar(),
-                a.getEstado()
+                a.getEstado(),
+                a.getMotivoRechazo()
         );
     }
 }
