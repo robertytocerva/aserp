@@ -19,6 +19,7 @@ public final class BitacoraDiseno {
     public static final Color BORDE_BC = new Color(0xE0, 0xE6, 0xED);
     public static final Color TEXTO_BC = new Color(0x33, 0x33, 0x33);
     public static final Color GRIS_PIE_BC = new Color(0x6B, 0x72, 0x80);
+    public static final Color TEXTO_CLARO_BC = new Color(0xC8, 0xD6, 0xE8);
     public static final Color BLANCO_BC = Color.WHITE;
 
     public static final String INSTITUTO = "Instituto Tecnológico Superior Campus Uruapan";
