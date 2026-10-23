@@ -75,6 +75,13 @@ There is no lint/format/typecheck tooling and no CI — compile + tests are the 
 - SMTP settings come from env vars (`MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM`, `MAIL_SMTP_AUTH`, `MAIL_STARTTLS`). Defaults point to Mailtrap (`sandbox.smtp.mailtrap.io:2525`). Local tests can use Mailpit with `MAIL_HOST=localhost`, `MAIL_PORT=1025`, `MAIL_SMTP_AUTH=false`, `MAIL_STARTTLS=false`.
 - Verifying completion in tests requires a sesion whose fecha is already past; the API forbids creating past sesiones, so tests adjust `asesorias.fecha` directly and restore it.
 
+## Estadisticas (admin, solo lectura)
+
+- `GET /api/admin/estadisticas` (+ `/reporte` for PDF) are ADMIN-only via the existing `/api/admin/**` matcher — no extra SecurityConfig needed.
+- Period defaults to the current academic semester (Jan 1–Jul 31 or Aug 1–Dec 31 by today's month); `desde > hasta` → 400. `EstadisticaService` is the single source for JSON and PDF — the PDF (`EstadisticaPdfService`, A4 landscape) consumes its `Response`, never recomputes.
+- Stats are by `asesorias.fecha` (session date) and current `estado`; `aceptadas = recibidas - pendientes - rechazadas`.
+- OpenPDF gotchas: record accessors are `campo()` not `getCampo()`; `PdfPTable` **drops incomplete rows** (pad cell counts to columns × rows); `writeSelectedRows` throws unless `setTotalWidth(...)` is called first (both PDF services' footers rely on it, swallowed by design in a try/catch).
+
 ## Materias por asesor (`asesor_materia`)
 
 - Only the admin assigns materias: writes live in `AdminController` under `/api/admin/asesores/{idAsesor}/materias` (POST / PUT `/{idMateria}` / DELETE `/{idMateria}`); `AsesorMateriaService` is the only writer of `asesor_materia`. Rows are addressed by `(idAsesor, idMateria)` (UNIQUE), not by `id_asesor_materia`.

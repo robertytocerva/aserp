@@ -1610,6 +1610,114 @@ El correo sale por el servidor SMTP configurado con `MAIL_HOST`, `MAIL_PORT`, `M
 
 ---
 
+## Estadisticas y reporte (solo admin)
+
+Solo rol `ADMIN`. Estas estadisticas permiten ver el desempeno de cada asesor y las metricas del programa en un periodo. Solo lectura, no modifica datos.
+
+### Definicion del periodo
+
+Ambos parametros son opcionales (`yyyy-MM-dd`):
+
+- Sin parametros: **semestre en curso** (Ene 1 – Jul 31 = semestre 1, Ago 1 – Dic 31 = semestre 2 segun el mes actual).
+- Si falta uno de los dos, se completa con el limite del semestre en curso.
+- `desde > hasta` → 400. Formato invalido → 400.
+
+**Formulas:**
+- `tasaAceptacion = aceptadas / recibidas * 100` donde `aceptadas = recibidas - pendientes - rechazadas` (todo lo que paso de `solicitada`).
+- `tasaCumplimiento = completadas / aceptadas * 100`.
+- `horasTotales` = suma de `hora_fin - hora_inicio` de las sesiones `completadas`.
+
+### Consultar estadisticas (JSON)
+
+```
+GET /api/admin/estadisticas
+GET /api/admin/estadisticas?desde=2026-08-01&hasta=2026-12-31
+Authorization: Bearer <token-admin>
+```
+
+**Response 200:**
+```json
+{
+  "periodo": { "desde": "2026-08-01", "hasta": "2026-12-31" },
+  "resumen": {
+    "recibidas": 14,
+    "pendientes": 5,
+    "completadas": 1,
+    "rechazadas": 3,
+    "canceladas": 0,
+    "noAsistio": 0,
+    "tasaAceptacion": 42.9,
+    "tasaCumplimiento": 16.7,
+    "horasTotales": 2.0,
+    "alumnosAtendidos": 1,
+    "asesoresConActividad": 6,
+    "asesoresTotales": 9
+  },
+  "porAsesor": [
+    {
+      "idAsesor": 16,
+      "nombre": "Maria Guadalupe Martinez Sanchez",
+      "matricula": "20240002",
+      "promedio": 9.4,
+      "validado": true,
+      "materias": 3,
+      "recibidas": 2,
+      "completadas": 1,
+      "rechazadas": 0,
+      "canceladas": 0,
+      "pendientes": 0,
+      "noAsistio": 0,
+      "horasCompletadas": 2.0,
+      "alumnosAtendidos": 1,
+      "tasaAceptacion": 100.0,
+      "tasaCumplimiento": 50.0
+    }
+  ],
+  "porMateria": [
+    { "materia": "Analisis de Datos", "total": 2, "completadas": 0 }
+  ]
+}
+```
+
+Notas:
+- `porAsesor` incluye **todos** los asesores, con zeros si no tienen actividad en el periodo. Ordenado por `completadas` descendente.
+- `porMateria` incluye solo materias con actividad, ordenadas por `total` descendente.
+
+**Response 400 (desde > hasta):**
+```json
+{
+  "timestamp": "2026-09-30T20:00:00",
+  "status": 400,
+  "error": "Bad Request",
+  "message": "La fecha desde debe ser anterior o igual a la fecha hasta"
+}
+```
+
+**Response 403 (token sin rol ADMIN):**
+```json
+{
+  "timestamp": "2026-09-30T20:00:00",
+  "status": 403,
+  "error": "Forbidden",
+  "message": "No tienes permisos para realizar esta accion"
+}
+```
+
+### Generar reporte PDF
+
+Mismo filtrado que el JSON. Devuelve un PDF en **A4 horizontal** con encabezado institucional, periodo, resumen, tabla de desempeno por asesor y solicitudes por materia. El PDF es descarga (`Content-Disposition: attachment`).
+
+```
+GET /api/admin/estadisticas/reporte?desde=2026-08-01&hasta=2026-12-31
+Authorization: Bearer <token-admin>
+```
+
+**Response 200:** `application/pdf` con `filename="estadisticas-<desde>-<hasta>.pdf"`.
+
+Errores igual que el JSON (400/401/403).
+
+---
+
 ## Flujo completo de registro y validacion de asesor
 
 Paso 1 - Crear carrera:
