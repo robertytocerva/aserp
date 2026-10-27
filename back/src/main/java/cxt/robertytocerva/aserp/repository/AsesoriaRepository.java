@@ -14,6 +14,8 @@ public interface AsesoriaRepository extends JpaRepository<Asesoria, Integer> {
 
     List<Asesoria> findByAlumnoIdAlumnoOrderByFechaAscHoraInicioAsc(Integer idAlumno);
 
+    List<Asesoria> findByFechaBetween(LocalDate desde, LocalDate hasta);
+
     List<Asesoria> findByAsesorIdAsesorOrderByFechaAscHoraInicioAsc(Integer idAsesor);
 
     List<Asesoria> findByAsesorIdAsesorAndEstadoInOrderByFechaAscHoraInicioAsc(Integer idAsesor,

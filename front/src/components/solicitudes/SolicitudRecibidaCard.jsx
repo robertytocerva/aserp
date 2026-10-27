@@ -1,5 +1,7 @@
 import { Card, Badge, Button, Spinner } from 'react-bootstrap';
 import { ESTADOS_SOLICITUD } from './SolicitudCard';
+import { bitacorasApi } from '../../api/bitacorasApi';
+import { useState } from 'react';
 
 const DIAS_CORTOS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 const MESES_CORTOS = [
@@ -11,8 +13,13 @@ function SolicitudRecibidaCard({
   solicitud,
   onAceptar,
   onRechazar,
+  onCompletar,
+  onGenerarBitacora,
   accionesEnCurso = false,
 }) {
+  const [descargandoPdf, setDescargandoPdf] = useState(false);
+  const [descargandoImagen, setDescargandoImagen] = useState(false);
+  
   const estado = ESTADOS_SOLICITUD[solicitud.estado] || ESTADOS_SOLICITUD.solicitada;
 
   const [year, month, day] = solicitud.fecha.split('-').map(Number);
@@ -29,6 +36,55 @@ function SolicitudRecibidaCard({
       : 'bi-building';
 
   const esPendiente = solicitud.estado === 'solicitada';
+  const esProgramada = solicitud.estado === 'programada';
+  const esCompletada = solicitud.estado === 'completada';
+
+  const ahora = new Date();
+  const [hFin, mFin] = solicitud.horaFin.split(':').map(Number);
+  const fechaFin = new Date(year, month - 1, day, hFin, mFin);
+  const sesionTerminada = fechaFin <= ahora;
+
+  // Descargar PDF
+  const handleDescargarPdf = async () => {
+    if (!solicitud.idBitacora) return;
+    setDescargandoPdf(true);
+    try {
+      const blob = await bitacorasApi.descargarPdf(solicitud.idBitacora);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `bitacora-${solicitud.idBitacora}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      alert('No se pudo descargar el PDF.');
+    } finally {
+      setDescargandoPdf(false);
+    }
+  };
+
+  // Descargar imagen
+  const handleDescargarImagen = async () => {
+    if (!solicitud.idBitacora) return;
+    setDescargandoImagen(true);
+    try {
+      const blob = await bitacorasApi.descargarImagen(solicitud.idBitacora);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `evidencia-${solicitud.idBitacora}`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      alert('No se pudo descargar la imagen.');
+    } finally {
+      setDescargandoImagen(false);
+    }
+  };
 
   return (
     <Card className="border-0 shadow-sm h-100">
@@ -97,7 +153,20 @@ function SolicitudRecibidaCard({
           </span>
         </div>
 
-        {esPendiente ? (
+        {solicitud.motivoRechazo && (
+          <div
+            className="mb-3 p-2 rounded small"
+            style={{ backgroundColor: '#FFF3CD', border: '1px solid #FFECB5' }}
+          >
+            <div className="fw-semibold mb-1">
+              <i className="bi bi-info-circle-fill me-1"></i>
+              Motivo del rechazo:
+            </div>
+            <div className="fst-italic">{solicitud.motivoRechazo}</div>
+          </div>
+        )}
+
+        {esPendiente && (
           <div className="d-flex gap-2">
             <Button
               size="sm"
@@ -126,7 +195,93 @@ function SolicitudRecibidaCard({
               <i className="bi bi-x-circle me-1"></i> Rechazar
             </Button>
           </div>
-        ) : (
+        )}
+
+        {esProgramada && (
+          <div className="d-flex flex-column gap-2">
+            {sesionTerminada ? (
+              <Button
+                size="sm"
+                variant="outline-primary"
+                className="w-100"
+                onClick={() => onCompletar?.(solicitud)}
+                disabled={accionesEnCurso}
+              >
+                {accionesEnCurso ? (
+                  <>
+                    <Spinner size="sm" animation="border" className="me-1" />
+                    Procesando...
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-check2-square me-1"></i>
+                    Completar sesión
+                  </>
+                )}
+              </Button>
+            ) : (
+              <div className="text-center text-suave small fst-italic py-2">
+                <i className="bi bi-clock-history me-1"></i>
+                Podrás completar esta sesión cuando termine.
+              </div>
+            )}
+          </div>
+        )}
+
+        {esCompletada && (
+          <div className="d-flex flex-column gap-2">
+            <Badge bg="success" className="mb-1">
+              <i className="bi bi-check-circle-fill me-1"></i>
+              Sesión completada
+            </Badge>
+
+            {solicitud.idBitacora ? (
+              <div className="d-flex gap-2">
+                <Button
+                  size="sm"
+                  className="btn-azul flex-grow-1"
+                  onClick={handleDescargarPdf}
+                  disabled={descargandoPdf}
+                >
+                  {descargandoPdf ? (
+                    <Spinner size="sm" animation="border" />
+                  ) : (
+                    <>
+                      <i className="bi bi-file-pdf me-1"></i> PDF
+                    </>
+                  )}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline-primary"
+                  className="flex-grow-1"
+                  onClick={handleDescargarImagen}
+                  disabled={descargandoImagen}
+                  title="Descargar imagen de evidencia"
+                >
+                  {descargandoImagen ? (
+                    <Spinner size="sm" animation="border" />
+                  ) : (
+                    <>
+                      <i className="bi bi-image me-1"></i> Imagen
+                    </>
+                  )}
+                </Button>
+              </div>
+            ) : (
+              <Button
+                size="sm"
+                className="btn-amarillo w-100"
+                onClick={() => onGenerarBitacora?.(solicitud)}
+              >
+                <i className="bi bi-journal-plus me-1"></i>
+                Generar bitácora
+              </Button>
+            )}
+          </div>
+        )}
+
+        {!esPendiente && !esProgramada && !esCompletada && (
           <div className="text-center text-suave small fst-italic py-2">
             {estado.descripcion}
           </div>

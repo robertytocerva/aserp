@@ -1,3 +1,4 @@
+import ModalBitacora from '../../components/solicitudes/ModalBitacora';
 import { useState, useEffect, useMemo } from 'react';
 import {
   Row,
@@ -8,6 +9,7 @@ import {
   ButtonGroup,
   InputGroup,
   Modal,
+  Spinner,
 } from 'react-bootstrap';
 import { solicitudesApi } from '../../api/solicitudesApi';
 import SolicitudRecibidaCard from '../../components/solicitudes/SolicitudRecibidaCard';
@@ -22,7 +24,15 @@ function SolicitudesRecibidas() {
   const [filtro, setFiltro] = useState('pendientes');
   const [busqueda, setBusqueda] = useState('');
   const [accionesEnCurso, setAccionesEnCurso] = useState({});
-  const [modalRechazar, setModalRechazar] = useState({ show: false, solicitud: null });
+  const [modalBitacora, setModalBitacora] = useState({ show: false, solicitud: null });
+
+  // Modal de rechazo con motivo
+  const [modalRechazar, setModalRechazar] = useState({
+    show: false,
+    solicitud: null,
+    motivo: '',
+    enviando: false,
+  });
 
   const cargar = async () => {
     setCargando(true);
@@ -60,25 +70,63 @@ function SolicitudesRecibidas() {
     }
   };
 
-  const handleRechazar = async () => {
-    const solicitud = modalRechazar.solicitud;
+  const handleRechazar = (solicitud) => {
+    setModalRechazar({
+      show: true,
+      solicitud,
+      motivo: '',
+      enviando: false,
+    });
+  };
+
+  const confirmarRechazo = async () => {
+    const { solicitud, motivo } = modalRechazar;
     if (!solicitud) return;
 
-    setAccionesEnCurso((prev) => ({ ...prev, [solicitud.idAsesoria]: true }));
+    setModalRechazar((prev) => ({ ...prev, enviando: true }));
     setError('');
     setExito('');
+
     try {
-      const actualizada = await solicitudesApi.rechazar(solicitud.idAsesoria);
+      const actualizada = await solicitudesApi.rechazar(
+        solicitud.idAsesoria,
+        motivo.trim() || null
+      );
       setSolicitudes((prev) =>
         prev.map((s) => (s.idAsesoria === solicitud.idAsesoria ? actualizada : s))
       );
       setExito(`Solicitud de ${solicitud.nombreAlumno} rechazada.`);
+      setModalRechazar({ show: false, solicitud: null, motivo: '', enviando: false });
     } catch (err) {
       setError(err.mensaje || 'No se pudo rechazar la solicitud.');
+      setModalRechazar((prev) => ({ ...prev, enviando: false }));
+    }
+  };
+
+  const handleCompletar = async (solicitud) => {
+    setAccionesEnCurso((prev) => ({ ...prev, [solicitud.idAsesoria]: true }));
+    setError('');
+    setExito('');
+    try {
+      const actualizada = await solicitudesApi.completar(solicitud.idAsesoria);
+      setSolicitudes((prev) =>
+        prev.map((s) => (s.idAsesoria === solicitud.idAsesoria ? actualizada : s))
+      );
+      setExito(`Sesión de ${solicitud.nombreAlumno} marcada como completada.`);
+    } catch (err) {
+      setError(err.mensaje || 'No se pudo completar la sesión.');
     } finally {
       setAccionesEnCurso((prev) => ({ ...prev, [solicitud.idAsesoria]: false }));
-      setModalRechazar({ show: false, solicitud: null });
     }
+  };
+
+  const handleGenerarBitacora = (solicitud) => {
+    setModalBitacora({ show: true, solicitud });
+  };
+
+  const handleBitacoraCreada = () => {
+    setExito('Bitácora creada y correos enviados correctamente.');
+    cargar();
   };
 
   const solicitudesFiltradas = useMemo(() => {
@@ -144,19 +192,22 @@ function SolicitudesRecibidas() {
             variant={filtro === 'pendientes' ? 'warning' : 'outline-warning'}
             onClick={() => setFiltro('pendientes')}
           >
-            <i className="bi bi-hourglass-split me-1"></i> Pendientes ({contadores.pendientes})
+            <i className="bi bi-hourglass-split me-1"></i> Pendientes (
+            {contadores.pendientes})
           </Button>
           <Button
             variant={filtro === 'programadas' ? 'success' : 'outline-success'}
             onClick={() => setFiltro('programadas')}
           >
-            <i className="bi bi-check-circle-fill me-1"></i> Programadas ({contadores.programadas})
+            <i className="bi bi-check-circle-fill me-1"></i> Programadas (
+            {contadores.programadas})
           </Button>
           <Button
             variant={filtro === 'historial' ? 'secondary' : 'outline-secondary'}
             onClick={() => setFiltro('historial')}
           >
-            <i className="bi bi-clock-history me-1"></i> Historial ({contadores.historial})
+            <i className="bi bi-clock-history me-1"></i> Historial (
+            {contadores.historial})
           </Button>
         </ButtonGroup>
 
@@ -198,7 +249,9 @@ function SolicitudesRecibidas() {
               <SolicitudRecibidaCard
                 solicitud={s}
                 onAceptar={handleAceptar}
-                onRechazar={(sol) => setModalRechazar({ show: true, solicitud: sol })}
+                onRechazar={handleRechazar}
+                onCompletar={handleCompletar}
+                onGenerarBitacora={handleGenerarBitacora}
                 accionesEnCurso={accionesEnCurso[s.idAsesoria]}
               />
             </Col>
@@ -206,14 +259,18 @@ function SolicitudesRecibidas() {
         </Row>
       )}
 
+      {/* ============ MODAL DE RECHAZO ============ */}
       <Modal
         show={modalRechazar.show}
-        onHide={() => setModalRechazar({ show: false, solicitud: null })}
+        onHide={() =>
+          !modalRechazar.enviando &&
+          setModalRechazar({ show: false, solicitud: null, motivo: '', enviando: false })
+        }
         centered
       >
-        <Modal.Header closeButton>
+        <Modal.Header closeButton={!modalRechazar.enviando}>
           <Modal.Title className="fw-bold text-danger">
-            <i className="bi bi-x-circle-fill me-2"></i>Confirmar rechazo
+            <i className="bi bi-x-circle-fill me-2"></i>Rechazar solicitud
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -221,6 +278,28 @@ function SolicitudesRecibidas() {
             ¿Seguro que quieres rechazar la solicitud de{' '}
             <strong>{modalRechazar.solicitud?.nombreAlumno}</strong>?
           </p>
+
+          <Form.Group className="mb-3">
+            <Form.Label className="fw-semibold small">
+              Motivo del rechazo (opcional)
+            </Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={3}
+              placeholder="Ej: Tengo un examen ese día, no puedo atender."
+              value={modalRechazar.motivo}
+              onChange={(e) =>
+                setModalRechazar({ ...modalRechazar, motivo: e.target.value })
+              }
+              maxLength={500}
+              disabled={modalRechazar.enviando}
+            />
+            <Form.Text className="text-suave">
+              {modalRechazar.motivo.length}/500 caracteres. El alumno verá este
+              mensaje en su correo.
+            </Form.Text>
+          </Form.Group>
+
           <Alert variant="info" className="small mb-0">
             El slot volverá a estar disponible para otros alumnos.
           </Alert>
@@ -228,15 +307,39 @@ function SolicitudesRecibidas() {
         <Modal.Footer>
           <Button
             variant="secondary"
-            onClick={() => setModalRechazar({ show: false, solicitud: null })}
+            onClick={() =>
+              setModalRechazar({ show: false, solicitud: null, motivo: '', enviando: false })
+            }
+            disabled={modalRechazar.enviando}
           >
             Cancelar
           </Button>
-          <Button variant="danger" onClick={handleRechazar}>
-            <i className="bi bi-x-circle me-1"></i> Sí, rechazar
+          <Button
+            variant="danger"
+            onClick={confirmarRechazo}
+            disabled={modalRechazar.enviando}
+          >
+            {modalRechazar.enviando ? (
+              <>
+                <Spinner size="sm" animation="border" className="me-2" />
+                Rechazando...
+              </>
+            ) : (
+              <>
+                <i className="bi bi-x-circle me-1"></i> Sí, rechazar
+              </>
+            )}
           </Button>
         </Modal.Footer>
       </Modal>
+
+      {/* ============ MODAL DE BITÁCORA ============ */}
+      <ModalBitacora
+        show={modalBitacora.show}
+        onHide={() => setModalBitacora({ show: false, solicitud: null })}
+        solicitud={modalBitacora.solicitud}
+        onSuccess={handleBitacoraCreada}
+      />
     </>
   );
 }

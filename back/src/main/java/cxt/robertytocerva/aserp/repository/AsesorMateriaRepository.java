@@ -15,4 +15,6 @@ public interface AsesorMateriaRepository extends JpaRepository<AsesorMateria, In
     Optional<AsesorMateria> findByAsesorIdAsesorAndMateriaIdMateria(Integer idAsesor, Integer idMateria);
 
     boolean existsByAsesorIdAsesorAndMateriaIdMateria(Integer idAsesor, Integer idMateria);
+
+    long countByAsesorIdAsesor(Integer idAsesor);
 }

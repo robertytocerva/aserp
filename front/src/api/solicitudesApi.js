@@ -47,11 +47,23 @@ export const solicitudesApi = {
   },
 
   /**
-   * HU-15: Rechazar una solicitud.
-   * PATCH /api/solicitudes/{id}/rechazar
+   * HU-16: Completar una sesión programada.
+   * PATCH /api/solicitudes/{id}/completar
+   * Requiere token del asesor dueño.
    */
-  rechazar: async (id) => {
-    const { data } = await axiosClient.patch(`/api/solicitudes/${id}/rechazar`);
+  completar: async (id) => {
+    const { data } = await axiosClient.patch(`/api/solicitudes/${id}/completar`);
+    return data;
+  },
+
+  /**
+   * HU-15: Rechazar una solicitud con motivo opcional.
+   * PATCH /api/solicitudes/{id}/rechazar
+   * Body: { motivo } (opcional)
+   */
+  rechazar: async (id, motivo = null) => {
+    const body = motivo ? { motivo } : {};
+    const { data } = await axiosClient.patch(`/api/solicitudes/${id}/rechazar`, body);
     return data;
   },
 };

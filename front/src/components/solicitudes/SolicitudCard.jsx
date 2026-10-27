@@ -1,4 +1,6 @@
-import { Card, Badge, Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Card, Badge, Button, OverlayTrigger, Tooltip, Spinner } from 'react-bootstrap';
+import { bitacorasApi } from '../../api/bitacorasApi';
+import { useState } from 'react';
 
 export const ESTADOS_SOLICITUD = {
   solicitada: {
@@ -46,6 +48,7 @@ const MESES_CORTOS = [
 ];
 
 function SolicitudCard({ solicitud, onVerDetalles }) {
+  const [descargandoPdf, setDescargandoPdf] = useState(false);
   const estado = ESTADOS_SOLICITUD[solicitud.estado] || ESTADOS_SOLICITUD.solicitada;
 
   const [year, month, day] = solicitud.fecha.split('-').map(Number);
@@ -68,6 +71,27 @@ function SolicitudCard({ solicitud, onVerDetalles }) {
 
   const sePuedeCancelar =
     esFutura && (solicitud.estado === 'solicitada' || solicitud.estado === 'programada');
+
+  // Descargar PDF de la bitácora (si existe)
+  const descargarPdf = async () => {
+    if (!solicitud.idBitacora) return;
+    setDescargandoPdf(true);
+    try {
+      const blob = await bitacorasApi.descargarPdf(solicitud.idBitacora);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `bitacora-${solicitud.idBitacora}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      alert('No se pudo descargar el PDF de la bitácora.');
+    } finally {
+      setDescargandoPdf(false);
+    }
+  };
 
   return (
     <Card className="border-0 shadow-sm h-100">
@@ -135,11 +159,25 @@ function SolicitudCard({ solicitud, onVerDetalles }) {
           </span>
         </div>
 
+        {/* Motivo del rechazo */}
+        {solicitud.motivoRechazo && (
+          <div
+            className="mb-3 p-2 rounded small"
+            style={{ backgroundColor: '#FFF3CD', border: '1px solid #FFECB5' }}
+          >
+            <div className="fw-semibold mb-1">
+              <i className="bi bi-info-circle-fill me-1"></i>
+              Motivo del rechazo:
+            </div>
+            <div className="fst-italic">{solicitud.motivoRechazo}</div>
+          </div>
+        )}
+
         <div className="text-suave small mb-3 fst-italic">
           {estado.descripcion}
         </div>
 
-        <div className="d-flex gap-2">
+        <div className="d-flex gap-2 flex-wrap">
           <Button
             size="sm"
             variant="outline-primary"
@@ -148,6 +186,22 @@ function SolicitudCard({ solicitud, onVerDetalles }) {
           >
             Ver detalles
           </Button>
+
+          {solicitud.idBitacora && (
+            <Button
+              size="sm"
+              className="btn-amarillo"
+              onClick={descargarPdf}
+              disabled={descargandoPdf}
+              title="Descargar bitácora en PDF"
+            >
+              {descargandoPdf ? (
+                <Spinner size="sm" animation="border" />
+              ) : (
+                <i className="bi bi-file-pdf"></i>
+              )}
+            </Button>
+          )}
 
           {sePuedeCancelar && (
             <OverlayTrigger

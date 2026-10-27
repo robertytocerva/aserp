@@ -1321,14 +1321,45 @@ Authorization: Bearer <token-asesor>
 
 ### Rechazar solicitud
 
-Requiere token del asesor dueño. Cambia `solicitada` → `rechazada`. El slot vuelve a estar disponible para reserva.
+Requiere token del asesor dueño. Cambia `solicitada` → `rechazada`. El slot vuelve a estar disponible para reserva. El body es opcional y puede incluir un `motivo` (max. 500 caracteres) que el alumno vera en su correo de notificacion.
 
 ```
 PATCH /api/solicitudes/1/rechazar
+Content-Type: application/json
 Authorization: Bearer <token-asesor>
 ```
 
-**Response 200:** Solicitud con `estado: "rechazada"`.
+**Body (opcional):**
+```json
+{
+  "motivo": "Tengo un examen ese dia, no puedo atender"
+}
+```
+
+Se puede enviar sin body para rechazar sin motivo.
+
+**Response 200:**
+```json
+{
+  "idAsesoria": 1,
+  "estado": "rechazada",
+  "motivoRechazo": "Tengo un examen ese dia, no puedo atender"
+}
+```
+
+(Sin motivo, `"motivoRechazo": null`.)
+
+**Response 400 (motivo demasiado largo):**
+```json
+{
+  "timestamp": "2026-09-30T20:00:00",
+  "status": 400,
+  "error": "Validation Error",
+  "errors": {
+    "motivo": "El motivo no debe exceder 500 caracteres"
+  }
+}
+```
 
 **Response 400 (no esta en estado solicitada):**
 ```json
@@ -1339,6 +1370,351 @@ Authorization: Bearer <token-asesor>
   "message": "Solo se pueden rechazar solicitudes en estado solicitada"
 }
 ```
+
+### Completar sesion
+
+Requiere token del asesor dueño. Cambia `programada` → `completada`. Solo se puede hacer cuando la sesion ya termino: fecha anterior a hoy, o fecha de hoy con hora actual igual o posterior a `horaFin`. Es el paso previo para generar la bitacora.
+
+```
+PATCH /api/solicitudes/1/completar
+Authorization: Bearer <token-asesor>
+```
+
+**Response 200:** Solicitud con `estado: "completada"`.
+
+**Response 400 (la sesion aun no termina):**
+```json
+{
+  "timestamp": "2026-09-30T20:00:00",
+  "status": 400,
+  "error": "Bad Request",
+  "message": "La sesion aun no ha terminado"
+}
+```
+
+**Response 400 (no esta en estado programada):**
+```json
+{
+  "timestamp": "2026-09-30T20:00:00",
+  "status": 400,
+  "error": "Bad Request",
+  "message": "Solo se pueden completar sesiones programadas"
+}
+```
+
+---
+
+## Notificaciones por correo de solicitudes
+
+Cada cambio en el ciclo de vida de una solicitud dispara un correo automatico (HTML con el estilo institucional de ASERP, con banda azul y pie). Los correos se envian **despues** de guardar el cambio: si el servidor SMTP falla, la operacion igual se completa y el fallo queda en los logs del servidor (no se revierte nada).
+
+| Evento | Quien lo provoca | Destinatario | Asunto |
+|---|---|---|---|
+| Solicitud creada | Alumno envia solicitud | **Asesor** | `Nueva solicitud de tutoria: {materia} ({fecha})` |
+| Solicitud aceptada | Asesor acepta | **Alumno** | `Sesion de tutoria confirmada: {materia} ({fecha})` |
+| Solicitud rechazada | Asesor rechaza | **Alumno** | `Solicitud de tutoria rechazada: {materia} ({fecha})` |
+
+Contenido de cada correo:
+
+- **Solicitud creada** (al asesor): saludo personalizado, tabla con fecha, horario, materia, modalidad/lugar y solicitante, y la llamada a accion "Ingrese a la plataforma para **aceptar o rechazar** esta solicitud".
+- **Sesión aceptada** (al alumno): tabla con los datos de la sesion y la llamada "Puede consultarla en **Mis solicitudes**".
+- **Solicitud rechazada** (al alumno): tabla con los datos, el bloque **Motivo del rechazo** solo si el asesor indico motivo, y la nota "El horario vuelve a estar disponible para reserva".
+
+---
+
+## Bitacoras de sesion
+
+Al terminar una sesion (`completada`), el asesor genera su bitacora. Los datos de la sesion (fecha, horario, materia, carrera, nombres y numero de control) se toman de la asesoria y se guardan junto a la bitacora, para que no cambien aunque despues se edite un horario o un nombre.
+
+Al guardar la bitacora se envia un correo **al asesor y al alumno** con la bitacora en el cuerpo (HTML) y un PDF adjunto. El envio ocurre despues de guardar: si el servidor de correo falla, la bitacora queda registrada igualmente y el resultado se refleja en `correoEnviado`.
+
+Reglas:
+- Una bitacora por sesion.
+- Imagen de evidencia opcional: JPG o PNG reales (se valida la firma del archivo), maximo 2 MB.
+- Solo el asesor dueño de la sesion puede crear la bitacora. El alumno y el asesor de la sesion pueden consultarla.
+
+### Crear bitacora
+
+Requiere token de un asesor validado. Envio `multipart/form-data`.
+
+```
+POST /api/bitacoras
+Authorization: Bearer <token-asesor>
+Content-Type: multipart/form-data
+```
+
+**Campos del formulario:**
+
+| Campo | Obligatorio | Descripcion |
+|---|---|---|
+| `idAsesoria` | si | Id de la sesion completada |
+| `temaTratado` | si | Tema tratado en la sesion |
+| `tareasAsignadas` | no | Tareas para el alumno |
+| `observaciones` | no | Observaciones del asesor |
+| `imagen` | no | Archivo JPG o PNG, maximo 2 MB |
+
+Ejemplo con curl:
+```bash
+curl -X POST http://localhost:8080/api/bitacoras \
+  -H "Authorization: Bearer <token-asesor>" \
+  -F idAsesoria=3 \
+  -F "temaTratado=Estructuras de datos: listas enlazadas y pilas" \
+  -F "tareasAsignadas=Resolver ejercicios 1 a 5 del capitulo 3" \
+  -F "observaciones=Buen avance, falta practicar recursion" \
+  -F "imagen=@evidencia.png;type=image/png"
+```
+
+**Response 201:**
+```json
+{
+  "idBitacora": 1,
+  "idAsesoria": 3,
+  "fecha": "2026-10-12",
+  "horario": "16:00 - 18:00",
+  "matricula": "20240003",
+  "nombreAlumno": "Carlos Alberto Garcia Ramirez",
+  "nombreAsesor": "Maria Guadalupe Martinez Sanchez",
+  "materia": "Programacion Orientada a Objetos",
+  "carrera": "Ingenieria en Sistemas Computacionales",
+  "temaTratado": "Estructuras de datos: listas enlazadas y pilas",
+  "tareasAsignadas": "Resolver ejercicios 1 a 5 del capitulo 3",
+  "observaciones": "Buen avance, falta practicar recursion",
+  "tieneImagen": true,
+  "correoEnviado": true
+}
+```
+
+`correoEnviado` puede seguir en `false` justo al crear la bitacora, porque el correo se envia despues de guardar. Consultala de nuevo con `GET /api/bitacoras/{id}` para ver el resultado final.
+
+**Response 400 (sesion no completada):**
+```json
+{
+  "timestamp": "2026-09-30T20:00:00",
+  "status": 400,
+  "error": "Bad Request",
+  "message": "Solo se puede generar bitacora de sesiones completadas"
+}
+```
+
+**Response 400 (ya existe bitacora para la sesion):**
+```json
+{
+  "timestamp": "2026-09-30T20:00:00",
+  "status": 400,
+  "error": "Bad Request",
+  "message": "La sesion ya tiene una bitacora registrada"
+}
+```
+
+**Response 400 (imagen con formato no permitido):**
+```json
+{
+  "timestamp": "2026-09-30T20:00:00",
+  "status": 400,
+  "error": "Bad Request",
+  "message": "La imagen debe ser JPG o PNG"
+}
+```
+
+**Response 400 (imagen mayor a 2 MB):**
+```json
+{
+  "timestamp": "2026-09-30T20:00:00",
+  "status": 400,
+  "error": "Bad Request",
+  "message": "La imagen no debe exceder 2 MB"
+}
+```
+
+**Response 400 (sesion de otro asesor):**
+```json
+{
+  "timestamp": "2026-09-30T20:00:00",
+  "status": 400,
+  "error": "Bad Request",
+  "message": "La sesion no pertenece al asesor autenticado"
+}
+```
+
+**Response 403 (token de alumno sin rol ASESOR):**
+```json
+{
+  "timestamp": "2026-09-30T20:00:00",
+  "status": 403,
+  "error": "Forbidden",
+  "message": "No tienes permisos para realizar esta accion"
+}
+```
+
+### Consultar bitacora
+
+Requiere token. Devuelve la bitacora si el usuario es el asesor o el alumno de la sesion.
+
+```
+GET /api/bitacoras/1
+Authorization: Bearer <token>
+```
+
+**Response 200:** misma forma que la respuesta de crear.
+
+**Response 404 (no existe o no es parte de la sesion):**
+```json
+{
+  "timestamp": "2026-09-30T20:00:00",
+  "status": 404,
+  "error": "Not Found",
+  "message": "Bitacora no encontrada con id: 1"
+}
+```
+
+### Descargar imagen de evidencia
+
+Requiere token de la sesion (asesor o alumno). Devuelve el archivo con su `Content-Type` original (`image/jpeg` o `image/png`).
+
+```
+GET /api/bitacoras/1/imagen
+Authorization: Bearer <token>
+```
+
+**Response 200:** bytes de la imagen.
+
+**Response 404 (la bitacora no tiene imagen):**
+```json
+{
+  "timestamp": "2026-09-30T20:00:00",
+  "status": 404,
+  "error": "Not Found",
+  "message": "La bitacora no tiene imagen de evidencia"
+}
+```
+
+### Descargar PDF de la bitacora
+
+Requiere token de la sesion (asesor o alumno). Genera el PDF con los datos de la bitacora y, si existe, la imagen de evidencia.
+
+```
+GET /api/bitacoras/1/pdf
+Authorization: Bearer <token>
+```
+
+**Response 200:** `application/pdf` con `Content-Disposition: attachment; filename="bitacora-1.pdf"`.
+
+### Formato del correo
+
+- **Asunto:** `Bitacora de tutoria: <materia> (<fecha>)`
+- **Destinatarios:** un correo para el asesor y otro para el alumno.
+- **Cuerpo:** tabla con fecha, horario, numero de control, estudiante, carrera, asesor y materia; luego tema tratado, tareas y observaciones.
+- **Adjunto:** `bitacora-<id>.pdf`.
+
+El correo sale por el servidor SMTP configurado con `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD` y `MAIL_FROM` (ver `.env.example`). Con Mailtrap, las credenciales son las de tu inbox.
+
+---
+
+## Estadisticas y reporte (solo admin)
+
+Solo rol `ADMIN`. Estas estadisticas permiten ver el desempeno de cada asesor y las metricas del programa en un periodo. Solo lectura, no modifica datos.
+
+### Definicion del periodo
+
+Ambos parametros son opcionales (`yyyy-MM-dd`):
+
+- Sin parametros: **semestre en curso** (Ene 1 – Jul 31 = semestre 1, Ago 1 – Dic 31 = semestre 2 segun el mes actual).
+- Si falta uno de los dos, se completa con el limite del semestre en curso.
+- `desde > hasta` → 400. Formato invalido → 400.
+
+**Formulas:**
+- `tasaAceptacion = aceptadas / recibidas * 100` donde `aceptadas = recibidas - pendientes - rechazadas` (todo lo que paso de `solicitada`).
+- `tasaCumplimiento = completadas / aceptadas * 100`.
+- `horasTotales` = suma de `hora_fin - hora_inicio` de las sesiones `completadas`.
+
+### Consultar estadisticas (JSON)
+
+```
+GET /api/admin/estadisticas
+GET /api/admin/estadisticas?desde=2026-08-01&hasta=2026-12-31
+Authorization: Bearer <token-admin>
+```
+
+**Response 200:**
+```json
+{
+  "periodo": { "desde": "2026-08-01", "hasta": "2026-12-31" },
+  "resumen": {
+    "recibidas": 14,
+    "pendientes": 5,
+    "completadas": 1,
+    "rechazadas": 3,
+    "canceladas": 0,
+    "noAsistio": 0,
+    "tasaAceptacion": 42.9,
+    "tasaCumplimiento": 16.7,
+    "horasTotales": 2.0,
+    "alumnosAtendidos": 1,
+    "asesoresConActividad": 6,
+    "asesoresTotales": 9
+  },
+  "porAsesor": [
+    {
+      "idAsesor": 16,
+      "nombre": "Maria Guadalupe Martinez Sanchez",
+      "matricula": "20240002",
+      "promedio": 9.4,
+      "validado": true,
+      "materias": 3,
+      "recibidas": 2,
+      "completadas": 1,
+      "rechazadas": 0,
+      "canceladas": 0,
+      "pendientes": 0,
+      "noAsistio": 0,
+      "horasCompletadas": 2.0,
+      "alumnosAtendidos": 1,
+      "tasaAceptacion": 100.0,
+      "tasaCumplimiento": 50.0
+    }
+  ],
+  "porMateria": [
+    { "materia": "Analisis de Datos", "total": 2, "completadas": 0 }
+  ]
+}
+```
+
+Notas:
+- `porAsesor` incluye **todos** los asesores, con zeros si no tienen actividad en el periodo. Ordenado por `completadas` descendente.
+- `porMateria` incluye solo materias con actividad, ordenadas por `total` descendente.
+
+**Response 400 (desde > hasta):**
+```json
+{
+  "timestamp": "2026-09-30T20:00:00",
+  "status": 400,
+  "error": "Bad Request",
+  "message": "La fecha desde debe ser anterior o igual a la fecha hasta"
+}
+```
+
+**Response 403 (token sin rol ADMIN):**
+```json
+{
+  "timestamp": "2026-09-30T20:00:00",
+  "status": 403,
+  "error": "Forbidden",
+  "message": "No tienes permisos para realizar esta accion"
+}
+```
+
+### Generar reporte PDF
+
+Mismo filtrado que el JSON. Devuelve un PDF en **A4 horizontal** con encabezado institucional, periodo, resumen, tabla de desempeno por asesor y solicitudes por materia. El PDF es descarga (`Content-Disposition: attachment`).
+
+```
+GET /api/admin/estadisticas/reporte?desde=2026-08-01&hasta=2026-12-31
+Authorization: Bearer <token-admin>
+```
+
+**Response 200:** `application/pdf` con `filename="estadisticas-<desde>-<hasta>.pdf"`.
+
+Errores igual que el JSON (400/401/403).
 
 ---
 
@@ -1437,4 +1813,20 @@ Paso 6 - El alumno consulta el estado de sus solicitudes:
 ```bash
 curl http://localhost:8080/api/solicitudes/mis \
   -H "Authorization: Bearer <token-alumno>"
+```
+
+Paso 7 - Al terminar la sesion, el asesor la marca como completada (la fecha debe estar cumplida):
+```bash
+curl -X PATCH http://localhost:8080/api/solicitudes/1/completar \
+  -H "Authorization: Bearer <token-asesor>"
+```
+
+Paso 8 - El asesor genera la bitacora. Se envia por correo al asesor y al alumno:
+```bash
+curl -X POST http://localhost:8080/api/bitacoras \
+  -H "Authorization: Bearer <token-asesor>" \
+  -F idAsesoria=1 \
+  -F "temaTratado=Tema de la sesion" \
+  -F "observaciones=Observaciones" \
+  -F "imagen=@evidencia.jpg;type=image/jpeg"
 ```

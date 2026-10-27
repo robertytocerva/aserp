@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: aserp-api
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/carreras
+    envVars:
+      - key: NEON_DB_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: SPRING_JPA_SHOW_SQL
+        value: "false"
+      - key: MAIL_HOST
+        sync: false
+      - key: MAIL_PORT
+        sync: false
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_FROM
+        sync: false
