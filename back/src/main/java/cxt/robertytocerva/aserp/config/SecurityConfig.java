@@ -41,8 +41,12 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        ////////////
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/asesores").hasAnyRole("ALUMNO", "ASESOR")
+                        .requestMatchers(HttpMethod.GET, "/api/solicitudes/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/bitacoras/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/bitacoras/*/pdf", "/api/bitacoras/*/imagen").hasAnyRole("ADMIN", "ALUMNO", "ASESOR")
+                        .requestMatchers("/api/bitacoras", "/api/bitacoras/**").hasAnyRole("ALUMNO", "ASESOR")
                         .requestMatchers("/api/horarios", "/api/horarios/**").hasRole("ASESOR")
                         .requestMatchers(HttpMethod.GET, "/api/solicitudes/mis").hasAnyRole("ALUMNO", "ASESOR")
                         .requestMatchers(HttpMethod.POST, "/api/solicitudes").hasAnyRole("ALUMNO", "ASESOR")

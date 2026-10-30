@@ -20,6 +20,15 @@ export const bitacorasApi = {
   },
 
   /**
+   * Listar TODAS las bitácoras (Admin)
+   * GET /api/admin/bitacoras
+   */
+  listarTodasAdmin: async () => {
+  const { data } = await axiosClient.get('/api/bitacoras/admin/todas'); // 👈 Nueva ruta
+  return data;
+},
+
+  /**
    * HU-22: Consultar bitácora por ID.
    * GET /api/bitacoras/{id}
    */

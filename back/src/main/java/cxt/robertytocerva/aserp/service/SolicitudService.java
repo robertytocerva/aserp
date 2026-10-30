@@ -151,6 +151,14 @@ public class SolicitudService {
         return toResponse(asesoria);
     }
 
+    //endpoint para listar todas las solicitudes (solo para admin)
+    @Transactional(readOnly = true)
+    public List<SolicitudDTO.Response> listarTodas() {
+        return asesoriaRepository.findAll().stream()
+                .map(this::toResponse) 
+                .toList();
+    }
+
     private Asesoria buscarPropia(Integer idAsesoria, Integer idAlumno) {
         Asesor asesor = asesorService.obtenerAsesorValidadoDeAlumno(idAlumno);
         Asesoria asesoria = asesoriaRepository.findById(idAsesoria)

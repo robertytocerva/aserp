@@ -13,6 +13,9 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+/////////
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/bitacoras")
 @RequiredArgsConstructor
@@ -36,17 +39,30 @@ public class BitacoraController {
         return ResponseEntity.ok(bitacoraService.obtener(id, idAlumno(jwt)));
     }
 
-    @GetMapping("/{id}/imagen")
+        @GetMapping("/{id}/imagen")
     public ResponseEntity<byte[]> imagen(@AuthenticationPrincipal Jwt jwt, @PathVariable Integer id) {
-        BitacoraService.Imagen img = bitacoraService.obtenerImagen(id, idAlumno(jwt));
+        Integer idAlumnoSeguro = null;
+        try {
+            idAlumnoSeguro = idAlumno(jwt);
+        } catch (BadRequestException e) { }
+
+        BitacoraService.Imagen img = bitacoraService.obtenerImagen(id, idAlumnoSeguro);
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(img.tipo()))
                 .body(img.datos());
     }
 
-    @GetMapping("/{id}/pdf")
+        @GetMapping("/{id}/pdf")
     public ResponseEntity<byte[]> pdf(@AuthenticationPrincipal Jwt jwt, @PathVariable Integer id) {
-        byte[] pdf = bitacoraService.obtenerPdf(id, idAlumno(jwt));
+        Integer idAlumnoSeguro = null;
+        try {
+            idAlumnoSeguro = idAlumno(jwt); // Intentamos sacar el ID del alumno
+        } catch (BadRequestException e) {
+            // Si falla porque es Admin, lo dejamos en null
+            // (El servicio buscarAccesible se encargará de validar si es Admin)
+        }
+        
+        byte[] pdf = bitacoraService.obtenerPdf(id, idAlumnoSeguro);
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_PDF)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"bitacora-" + id + ".pdf\"")
@@ -59,5 +75,12 @@ public class BitacoraController {
             throw new BadRequestException("La cuenta no tiene un alumno asociado");
         }
         return claim.intValue();
+    }
+
+
+    ///////
+    @GetMapping("/admin/todas") 
+    public ResponseEntity<List<BitacoraDTO.Response>> listarTodasAdmin() {
+        return ResponseEntity.ok(bitacoraService.listarTodas());
     }
 }
