@@ -15,9 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-//
-import java.util.List;
-
 import java.io.IOException;
 
 @Service
@@ -120,28 +117,12 @@ public class BitacoraService {
         return bitacoraPdfService.generar(b);
     }
 
-    /////////
-    @Transactional(readOnly = true)
-    public List<BitacoraDTO.Response> listarTodas() {
-        return bitacoraRepository.findAll().stream()
-                .map(this::toResponse)
-                .toList();
-    }
-
-
-        private Bitacora buscarAccesible(Integer idBitacora, Integer idAlumno) {
+    private Bitacora buscarAccesible(Integer idBitacora, Integer idAlumno) {
         Bitacora b = bitacoraRepository.findById(idBitacora)
                 .orElseThrow(() -> new ResourceNotFoundException("Bitacora no encontrada con id: " + idBitacora));
         Asesoria a = b.getAsesoria();
-        
-        // Si el idAlumno es nulo, significa que es el Admin haciendo la peticion
-        if (idAlumno == null) {
-            return b;
-        }
-
         boolean esAsesor = a.getAsesor().getAlumno().getIdAlumno().equals(idAlumno);
         boolean esAlumno = a.getAlumno().getIdAlumno().equals(idAlumno);
-        
         if (!esAsesor && !esAlumno) {
             throw new ResourceNotFoundException("Bitacora no encontrada con id: " + idBitacora);
         }

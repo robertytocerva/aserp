@@ -1,7 +1,7 @@
 package cxt.robertytocerva.aserp.controller;
 
 import cxt.robertytocerva.aserp.dto.EstadisticaDTO;
-import cxt.robertytocerva.aserp.service.EstadisticaPdfService;
+import cxt.robertytocerva.aserp.service.EstadisticaExcelService;
 import cxt.robertytocerva.aserp.service.EstadisticaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -20,8 +20,12 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class EstadisticasController {
 
+    /** MIME del libro de Excel .xlsx. */
+    private static final MediaType XLSX =
+            MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
     private final EstadisticaService estadisticaService;
-    private final EstadisticaPdfService estadisticaPdfService;
+    private final EstadisticaExcelService estadisticaExcelService;
 
     @GetMapping
     public ResponseEntity<EstadisticaDTO.Response> obtener(
@@ -35,11 +39,11 @@ public class EstadisticasController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
         EstadisticaDTO.Response datos = estadisticaService.obtener(desde, hasta);
-        byte[] pdf = estadisticaPdfService.generar(datos);
-        String nombre = "estadisticas-" + datos.periodo().desde() + "-" + datos.periodo().hasta() + ".pdf";
+        byte[] contenido = estadisticaExcelService.generar(datos);
+        String nombre = "estadisticas-" + datos.periodo().desde() + "-" + datos.periodo().hasta() + ".xlsx";
         return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_PDF)
+                .contentType(XLSX)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + nombre + "\"")
-                .body(pdf);
+                .body(contenido);
     }
 }

@@ -11,7 +11,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
-//
 import java.util.List;
 
 @RestController
@@ -64,11 +63,5 @@ public class SolicitudController {
             throw new BadRequestException("La cuenta no tiene un alumno asociado");
         }
         return claim.intValue();
-    }
-
-    //endpoint para listar
-    @GetMapping("/admin/todas") 
-    public ResponseEntity<List<SolicitudDTO.Response>> listarTodasAdmin() {
-        return ResponseEntity.ok(solicitudService.listarTodas());
     }
 }

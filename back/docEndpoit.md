@@ -1703,16 +1703,20 @@ Notas:
 }
 ```
 
-### Generar reporte PDF
+### Generar reporte Excel (XLSX)
 
-Mismo filtrado que el JSON. Devuelve un PDF en **A4 horizontal** con encabezado institucional, periodo, resumen, tabla de desempeno por asesor y solicitudes por materia. El PDF es descarga (`Content-Disposition: attachment`).
+Mismo filtrado que el JSON. Devuelve un libro de Excel (.xlsx) con tres hojas:
+
+- **Resumen**: titulo institucional, periodo y las metricas generales (estados, tasas, horas, alumnos).
+- **Por asesor**: una fila por asesor con todas sus metricas. Encabezado congelado y filtros activados; las columnas son numericas (promedio, horas, porcentajes) para poder ordenar y calcular en Excel.
+- **Por materia**: total de solicitudes y completadas por materia.
 
 ```
 GET /api/admin/estadisticas/reporte?desde=2026-08-01&hasta=2026-12-31
 Authorization: Bearer <token-admin>
 ```
 
-**Response 200:** `application/pdf` con `filename="estadisticas-<desde>-<hasta>.pdf"`.
+**Response 200:** `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` con `Content-Disposition: attachment; filename="estadisticas-<desde>-<hasta>.xlsx"`. Se abre directamente en Microsoft Excel.
 
 Errores igual que el JSON (400/401/403).
 
