@@ -60,10 +60,10 @@ export const solicitudesApi = {
    * Listar TODAS las solicitudes (Admin)
    * GET /api/admin/solicitudes
    */
-  listarTodasAdmin: async () => {
-  const { data } = await axiosClient.get('/api/solicitudes/admin/todas'); // 👈 Nueva ruta
-  return data;
-},
+    listarTodasAdmin: async () => {
+    const { data } = await axiosClient.get('/api/admin/solicitudes');
+    return data;
+  },
 
   /**
    * HU-15: Rechazar una solicitud con motivo opcional.

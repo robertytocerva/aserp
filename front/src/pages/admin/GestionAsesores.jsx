@@ -9,10 +9,13 @@ import {
   ButtonGroup,
   Spinner,
   Modal,
+  Row,
+  Col
 } from 'react-bootstrap';
 import { asesoresApi } from '../../api/asesoresApi';
 import { adminApi } from '../../api/adminApi';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import { alumnosApi } from '../../api/alumnosApi';
 
 function GestionAsesores() {
   const [asesores, setAsesores] = useState([]);
@@ -24,6 +27,7 @@ function GestionAsesores() {
   const [busqueda, setBusqueda] = useState('');
   const [accionesEnCurso, setAccionesEnCurso] = useState({});
   const [modalBaja, setModalBaja] = useState({ show: false, asesor: null });
+  const [modalInfo, setModalInfo] = useState({ show: false, alumno: null, cargando: false });
 
   const cargarAsesores = async () => {
     setCargando(true);
@@ -104,6 +108,17 @@ function GestionAsesores() {
   }, [asesores, filtro, busqueda]);
 
   const pendientes = asesores.filter((a) => !a.validado && a.activo).length;
+
+    const handleVerInfo = async (idAlumno) => {
+    setModalInfo({ show: true, alumno: null, cargando: true });
+    try {
+      const data = await alumnosApi.buscarPorId(idAlumno);
+      setModalInfo({ show: true, alumno: data, cargando: false });
+    } catch (err) {
+      alert('No se pudo cargar la información del alumno.');
+      setModalInfo({ show: false, alumno: null, cargando: false });
+    }
+  };
 
   return (
     <>
@@ -245,7 +260,18 @@ function GestionAsesores() {
                       </td>
                       <td className="text-end">
                         <div className="d-flex gap-2 justify-content-end">
+
+                          <Button
+                            size="sm"
+                            variant="outline-info"
+                            onClick={() => handleVerInfo(a.idAlumno)}
+                            title="Ver información del alumno"
+                          >
+                            <i className="bi bi-eye"></i>
+                          </Button>
+
                           {a.activo && !a.validado && (
+                            
                             <Button
                               size="sm"
                               className="btn-azul"
@@ -329,6 +355,76 @@ function GestionAsesores() {
           </Button>
         </Modal.Footer>
       </Modal>
+
+            {/* Modal de información del alumno */}
+      <Modal
+        show={modalInfo.show}
+        onHide={() => setModalInfo({ show: false, alumno: null, cargando: false })}
+        size="lg"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title className="fw-bold text-azul">
+            <i className="bi bi-person-badge me-2"></i>
+            Información del alumno postulante
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {modalInfo.cargando ? (
+            <div className="text-center py-4">
+              <Spinner animation="border" className="text-primary" />
+              <p className="mt-2 text-suave">Cargando datos...</p>
+            </div>
+          ) : modalInfo.alumno ? (
+            <Row className="g-3">
+              <Col md={6}>
+                <div className="p-3 rounded" style={{ backgroundColor: 'var(--azul-suave)' }}>
+                  <div className="text-suave small fw-semibold">MATRÍCULA</div>
+                  <div className="fw-bold text-azul">{modalInfo.alumno.matricula}</div>
+                </div>
+              </Col>
+              <Col md={6}>
+                <div className="p-3 rounded" style={{ backgroundColor: 'var(--azul-suave)' }}>
+                  <div className="text-suave small fw-semibold">CARRERA</div>
+                  <div className="fw-bold text-azul">{modalInfo.alumno.nombreCarrera}</div>
+                </div>
+              </Col>
+              <Col md={6}>
+                <div className="p-3 rounded border">
+                  <div className="text-suave small fw-semibold">NOMBRE COMPLETO</div>
+                  <div className="fw-semibold">
+                    {modalInfo.alumno.nombre} {modalInfo.alumno.apellidoPaterno} {modalInfo.alumno.apellidoMaterno || ''}
+                  </div>
+                </div>
+              </Col>
+              <Col md={6}>
+                <div className="p-3 rounded border">
+                  <div className="text-suave small fw-semibold">SEMESTRE</div>
+                  <div className="fw-semibold">{modalInfo.alumno.semestre}°</div>
+                </div>
+              </Col>
+              <Col md={6}>
+                <div className="p-3 rounded border">
+                  <div className="text-suave small fw-semibold">CORREO ELECTRÓNICO</div>
+                  <div className="fw-semibold">{modalInfo.alumno.correo}</div>
+                </div>
+              </Col>
+              <Col md={6}>
+                <div className="p-3 rounded border">
+                  <div className="text-suave small fw-semibold">TELÉFONO</div>
+                  <div className="fw-semibold">{modalInfo.alumno.telefono || 'No registrado'}</div>
+                </div>
+              </Col>
+            </Row>
+          ) : null}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setModalInfo({ show: false, alumno: null, cargando: false })}>
+            Cerrar
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
     </>
   );
 }

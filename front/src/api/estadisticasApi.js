@@ -3,8 +3,7 @@ import axiosClient from './axiosClient';
 export const estadisticasApi = {
   /**
    * Obtiene las estadísticas del programa en un periodo.
-   * GET /api/admin/estadisticas?desde=YYYY-MM-DD&hasta=YYYY-MM-DD
-   * Requiere token de ADMIN.
+   * GET /api/admin/estadisticas
    */
   obtener: async (desde = null, hasta = null) => {
     const params = new URLSearchParams();
@@ -20,11 +19,10 @@ export const estadisticasApi = {
   },
 
   /**
-   * Descarga el PDF del reporte.
-   * GET /api/admin/estadisticas/reporte?desde=...&hasta=...
-   * Devuelve un Blob (application/pdf).
+   * Descarga el reporte en formato Excel (.xlsx).
+   * GET /api/admin/estadisticas/reporte
    */
-  descargarPdf: async (desde = null, hasta = null) => {
+  descargarExcel: async (desde = null, hasta = null) => {
     const params = new URLSearchParams();
     if (desde) params.append('desde', desde);
     if (hasta) params.append('hasta', hasta);

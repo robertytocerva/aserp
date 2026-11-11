@@ -50,6 +50,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/api/solicitudes/*/aceptar",
                                 "/api/solicitudes/*/rechazar", "/api/solicitudes/*/completar").hasRole("ASESOR")
                         .requestMatchers(HttpMethod.POST, "/api/bitacoras").hasRole("ASESOR")
+                                                // Permite al ADMIN descargar PDFs e imágenes de bitácoras
+                        .requestMatchers(HttpMethod.GET, "/api/bitacoras/*/pdf", "/api/bitacoras/*/imagen").hasAnyRole("ADMIN", "ALUMNO", "ASESOR")
                         .requestMatchers("/api/bitacoras", "/api/bitacoras/**").hasAnyRole("ALUMNO", "ASESOR")
                         .anyRequest().permitAll()
                 )

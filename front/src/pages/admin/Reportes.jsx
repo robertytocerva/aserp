@@ -49,24 +49,24 @@ function Reportes() {
     cargar();
   };
 
-  // ============ DESCARGAR PDF ============
-  const descargarPdf = async () => {
+  // ============ DESCARGAR EXCEL ============
+    const descargarExcel = async () => {
     setDescargando(true);
     try {
-      const blob = await estadisticasApi.descargarPdf(
+      const blob = await estadisticasApi.descargarExcel(
         periodo.desde || null,
         periodo.hasta || null
       );
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `estadisticas-${periodo.desde || 'semestre'}-${periodo.hasta || 'actual'}.pdf`;
+      link.download = `estadisticas-${periodo.desde || 'semestre'}-${periodo.hasta || 'actual'}.xlsx`;
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      setError(err.mensaje || 'No se pudo descargar el PDF.');
+      setError(err.mensaje || 'No se pudo descargar el Excel.');
     } finally {
       setDescargando(false);
     }
@@ -93,7 +93,7 @@ function Reportes() {
         <Button
           variant="outline-success"
           size="sm"
-          onClick={descargarPdf}
+          onClick={descargarExcel}
           disabled={descargando}
         >
           {descargando ? (
@@ -103,7 +103,7 @@ function Reportes() {
             </>
           ) : (
             <>
-              <i className="bi bi-download me-1"></i> Descargar PDF
+              <i className="bi bi-download me-1"></i> Descargar Excel
             </>
           )}
         </Button>
